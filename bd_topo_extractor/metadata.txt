@@ -1,0 +1,25 @@
+[general]
+name=BD Topo Extractor
+about=It allows the user to extract elements from IGN's BD Topo with an extent or inside a layer as reference.
+category=Vector
+hasProcessingProvider=yes
+description=It allows the user to extract elements from IGN's BD Topo with an extent or inside a layer as reference. You cans select wich element you want to extract.
+icon=resources/images/default_icon.png
+tags=vector
+
+# credits and contact
+author=Jules GRILLOT
+email=jules.grillot@gmail.com
+homepage=https://github.com/JulesGrillot/bd_topo_extractor
+repository=https://github.com/JulesGrillot/bd_topo_extractor
+tracker=https://github.com/JulesGrillot/bd_topo_extractor/issues
+
+# experimental flag
+deprecated=False
+experimental=True
+qgisMinimumVersion=3.10
+qgisMaximumVersion=3.99
+
+# versioning
+version=0.1.0
+changelog=
