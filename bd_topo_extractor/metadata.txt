@@ -10,9 +10,9 @@ tags=vector
 # credits and contact
 author=Jules GRILLOT
 email=jules.grillot@gmail.com
-homepage=https://github.com/JulesGrillot/bd_topo_extractor
-repository=https://github.com/JulesGrillot/bd_topo_extractor
-tracker=https://github.com/JulesGrillot/bd_topo_extractor/issues
+homepage=https://github.com/JulesGrillot/plugin_bd_topo_extractor
+repository=https://github.com/JulesGrillot/plugin_bd_topo_extractor
+tracker=https://github.com/JulesGrillot/plugin_bd_topo_extractor/issues
 
 # experimental flag
 deprecated=False

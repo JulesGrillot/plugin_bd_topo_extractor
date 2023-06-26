@@ -14,6 +14,7 @@ from qgis.gui import QgsOptionsPageWidget, QgsOptionsWidgetFactory
 from qgis.PyQt import uic
 from qgis.PyQt.Qt import QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QIcon
+from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QPushButton
 
 # project
 from bd_topo_extractor.__about__ import (
@@ -26,6 +27,7 @@ from bd_topo_extractor.__about__ import (
 )
 from bd_topo_extractor.toolbelt import PlgLogger, PlgOptionsManager
 from bd_topo_extractor.toolbelt.preferences import PlgSettingsStructure
+from bd_topo_extractor.processing import RectangleDrawTool
 
 # ############################################################################
 # ########## Globals ###############
@@ -39,6 +41,44 @@ FORM_CLASS, _ = uic.loadUiType(
 # ############################################################################
 # ########## Classes ###############
 # ##################################
+
+
+class BdTopoExtractorDialog(QDialog):
+    def __init__(self, parent=None, iface=None, project=None):
+        """Constructor."""
+        super(BdTopoExtractorDialog, self).__init__(parent)
+        self.setObjectName("{}".format(__title__))
+
+        self.iface = iface
+        self.project = project
+        self.crs = project.crs()
+        self.canvas = self.iface.mapCanvas()
+        self.result = False
+        self.resize(400, 600)
+
+        self.draw_rectangle_button = QPushButton(self)
+        self.draw_rectangle_button.setGeometry(30, 100, 150, 30)
+        self.draw_rectangle_button.clicked.connect(self.pointer)
+        self.draw_rectangle_button.setText("Dessiner un rectangle")
+
+        self.button_box = QDialogButtonBox(self)
+        self.button_box.setGeometry(30, 240, 341, 32)
+        self.button_box.addButton("Ok", QDialogButtonBox.AcceptRole)
+        self.button_box.addButton("Cancel", QDialogButtonBox.RejectRole)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+        self.accepted.connect(self.get_result)
+
+    def get_result(self):
+        self.rectangle_tool.rubber_band.reset()
+        self.rectangle_tool.deactivate()
+        self.canvas.unsetMapTool(self.rectangle_tool)
+        print(self.rectangle_tool.rectangle())
+        self.result = True
+
+    def pointer(self):
+        self.rectangle_tool = RectangleDrawTool(self.canvas)
+        self.canvas.setMapTool(self.rectangle_tool)
 
 
 class ConfigOptionsPage(FORM_CLASS, QgsOptionsPageWidget):
@@ -102,7 +142,6 @@ class ConfigOptionsPage(FORM_CLASS, QgsOptionsPageWidget):
         self.opt_debug.setChecked(settings.debug_mode)
         self.lbl_version_saved_value.setText(settings.version)
 
-
     def reset_settings(self):
         """Reset settings to default values (set in preferences.py module)."""
         default_settings = PlgSettingsStructure()
@@ -113,11 +152,12 @@ class ConfigOptionsPage(FORM_CLASS, QgsOptionsPageWidget):
         # update the form
         self.load_settings()
 
+
 class PlgOptionsFactory(QgsOptionsWidgetFactory):
     """Factory for options widget."""
 
     def __init__(self):
-        """Constructor."""        
+        """Constructor."""
         super().__init__()
 
     def icon(self) -> QIcon:
@@ -125,7 +165,7 @@ class PlgOptionsFactory(QgsOptionsWidgetFactory):
 
         :return: _description_
         :rtype: QIcon
-        """        
+        """
         return QIcon(str(__icon_path__))
 
     def createWidget(self, parent) -> ConfigOptionsPage:
@@ -136,7 +176,7 @@ class PlgOptionsFactory(QgsOptionsWidgetFactory):
 
         :return: options page for tab widget
         :rtype: ConfigOptionsPage
-        """        
+        """
         return ConfigOptionsPage(parent)
 
     def title(self) -> str:
@@ -144,7 +184,7 @@ class PlgOptionsFactory(QgsOptionsWidgetFactory):
 
         :return: plugin title from about module
         :rtype: str
-        """        
+        """
         return __title__
 
     def helpId(self) -> str:
@@ -154,4 +194,3 @@ class PlgOptionsFactory(QgsOptionsWidgetFactory):
         :rtype: str
         """
         return __uri_homepage__
-

@@ -9,7 +9,7 @@ from functools import partial
 from pathlib import Path
 
 # PyQGIS
-from qgis.core import QgsApplication, QgsSettings
+from qgis.core import QgsApplication, QgsSettings, QgsProject
 from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import QCoreApplication, QLocale, QTranslator, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QIcon
@@ -24,7 +24,13 @@ from bd_topo_extractor.__about__ import (
 )
 from bd_topo_extractor.gui.dlg_settings import PlgOptionsFactory
 
+from bd_topo_extractor.gui.dlg_settings import BdTopoExtractorDialog
+
 from bd_topo_extractor.processing import BdTopoExtractorProvider
+
+from bd_topo_extractor.processing import RectangleDrawTool
+
+from bd_topo_extractor.processing import WfsRequest
 
 from bd_topo_extractor.toolbelt import PlgLogger
 
@@ -42,8 +48,10 @@ class BdTopoExtractorPlugin:
         :type iface: QgsInterface
         """
         self.iface = iface
+        self.project = QgsProject.instance()
         self.log = PlgLogger().log
         self.provider = None
+        self.pluginIsActive = False
 
         # translation
         # initialize the locale
@@ -67,6 +75,14 @@ class BdTopoExtractorPlugin:
         self.iface.registerOptionsWidgetFactory(self.options_factory)
 
         # -- Actions
+        self.action_launch = QAction(
+            QIcon(str(__icon_path__)),
+            self.tr("BD Topo Extractor"),
+            self.iface.mainWindow(),
+        )
+        self.iface.addToolBarIcon(self.action_launch)
+        self.action_launch.triggered.connect(lambda: self.run())
+
         self.action_help = QAction(
             QgsApplication.getThemeIcon("mActionHelpContents.svg"),
             self.tr("Help"),
@@ -88,6 +104,7 @@ class BdTopoExtractorPlugin:
         )
 
         # -- Menu
+        self.iface.addPluginToMenu(__title__, self.action_launch)
         self.iface.addPluginToMenu(__title__, self.action_settings)
         self.iface.addPluginToMenu(__title__, self.action_help)
 
@@ -111,7 +128,6 @@ class BdTopoExtractorPlugin:
             self.action_help_plugin_menu_documentation
         )
 
-    
     def initProcessing(self):
         self.provider = BdTopoExtractorProvider()
         QgsApplication.processingRegistry().addProvider(self.provider)
@@ -130,6 +146,8 @@ class BdTopoExtractorPlugin:
     def unload(self):
         """Cleans up when plugin is disabled/uninstalled."""
         # -- Clean up menu
+        self.iface.removePluginMenu(__title__, self.action_launch)
+        self.iface.removeToolBarIcon(self.action_launch)
         self.iface.removePluginMenu(__title__, self.action_help)
         self.iface.removePluginMenu(__title__, self.action_settings)
 
@@ -146,8 +164,10 @@ class BdTopoExtractorPlugin:
             )
 
         # remove actions
+        del self.action_launch
         del self.action_settings
         del self.action_help
+        self.pluginIsActive = False
 
     def run(self):
         """Main process.
@@ -166,3 +186,9 @@ class BdTopoExtractorPlugin:
                 log_level=2,
                 push=True,
             )
+        if not self.pluginIsActive:
+            self.dlg = BdTopoExtractorDialog(None, self.iface, self.project)
+            self.dlg.show()
+            if self.dlg.result:
+                self.pluginIsActive = True
+                print("ok")
