@@ -9,8 +9,13 @@ from functools import partial
 from pathlib import Path
 
 # PyQGIS
-from qgis.core import QgsApplication
-from qgis.gui import QgsOptionsPageWidget, QgsOptionsWidgetFactory
+from qgis.core import (
+    QgsApplication,
+    QgsGeometry,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+)
+from qgis.gui import QgsOptionsPageWidget, QgsOptionsWidgetFactory, QgsMapLayerComboBox
 from qgis.PyQt import uic
 from qgis.PyQt.Qt import QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QIcon
@@ -51,9 +56,13 @@ class BdTopoExtractorDialog(QDialog):
 
         self.iface = iface
         self.project = project
-        self.crs = project.crs()
+        self.crs = self.project.crs()
         self.canvas = self.iface.mapCanvas()
-        self.result = False
+        self.rectangle_tool = RectangleDrawTool(self.canvas)
+        self.layer = None
+        self.new_crs = QgsCoordinateReferenceSystem()
+        self.new_crs.createFromSrid(4326)
+
         self.resize(400, 600)
 
         self.draw_rectangle_button = QPushButton(self)
@@ -61,24 +70,45 @@ class BdTopoExtractorDialog(QDialog):
         self.draw_rectangle_button.clicked.connect(self.pointer)
         self.draw_rectangle_button.setText("Dessiner un rectangle")
 
+        self.select_layer_combo_box = QgsMapLayerComboBox(self)
+        self.select_layer_combo_box.setGeometry(30, 120, 150, 30)
+
         self.button_box = QDialogButtonBox(self)
-        self.button_box.setGeometry(30, 240, 341, 32)
+        self.button_box.setGeometry(30, 340, 341, 32)
         self.button_box.addButton("Ok", QDialogButtonBox.AcceptRole)
         self.button_box.addButton("Cancel", QDialogButtonBox.RejectRole)
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
         self.accepted.connect(self.get_result)
+        self.rejected.connect(self.disconnect)
+        self.rectangle_tool.signal.connect(self.activate_window)
 
     def get_result(self):
-        self.rectangle_tool.rubber_band.reset()
-        self.rectangle_tool.deactivate()
-        self.canvas.unsetMapTool(self.rectangle_tool)
-        print(self.rectangle_tool.rectangle())
-        self.result = True
+        if self.rectangle_tool:
+            self.rectangle_tool.rubber_band.reset()
+            self.canvas.unsetMapTool(self.rectangle_tool)
+            self.extent = self.transform_crs(self.rectangle_tool.rectangle())
+        else:
+            self.layer = self.select_layer_combo_box.currentLayer()
+            self.crs = self.layer.crs()
+            self.extent = self.transform_crs(self.layer.extent())
+
+    def transform_crs(self, rectangle):
+        geom = QgsGeometry().fromRect(rectangle)
+        geom.transform(QgsCoordinateTransform(self.crs, self.new_crs, self.project))
+        transformed_extent = geom.boundingBox()
+        return transformed_extent
+
+    def disconnect(self):
+        if self.rectangle_tool:
+            self.canvas.unsetMapTool(self.rectangle_tool)
+            self.rectangle_tool.rubber_band.reset()
 
     def pointer(self):
-        self.rectangle_tool = RectangleDrawTool(self.canvas)
         self.canvas.setMapTool(self.rectangle_tool)
+
+    def activate_window(self):
+        self.activateWindow()
 
 
 class ConfigOptionsPage(FORM_CLASS, QgsOptionsPageWidget):

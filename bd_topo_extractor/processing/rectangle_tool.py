@@ -1,12 +1,17 @@
 from qgis.gui import QgsMapTool, QgsMapMouseEvent, QgsRubberBand
 from qgis.core import QgsPointXY, QgsWkbTypes, QgsRectangle
 from PyQt5.QtGui import QColor
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 
 
 class RectangleDrawTool(QgsMapTool):
+    signal = pyqtSignal()
+
     def __init__(self, canvas=None):
         super().__init__(canvas)
+
+        self.signal.connect(self.deactivate)
+
         self.canvas = canvas
         self.start_point = None
         self.end_point = None
@@ -40,9 +45,11 @@ class RectangleDrawTool(QgsMapTool):
     def canvasReleaseEvent(self, event: QgsMapMouseEvent):
         # if the left mouse button was released
         if event.button() == Qt.LeftButton:
-            # get the rectangle created from the click point and
-            # left mouse button release points
-            self.new_extent = self.rectangle()
+            if event.type() == 3:
+                # get the rectangle created from the click point and
+                # left mouse button release points
+                self.new_extent = self.rectangle()
+                self.signal.emit()
         # toggle the flag, the left mouse button is no longer held down
         self.is_left_button_pressed = False
 
@@ -76,5 +83,4 @@ class RectangleDrawTool(QgsMapTool):
         return self.new_extent
 
     def deactivate(self):
-        QgsMapTool.deactivate(self)
-        self.deactivated.emit()
+        pass

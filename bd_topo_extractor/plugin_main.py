@@ -188,7 +188,14 @@ class BdTopoExtractorPlugin:
             )
         if not self.pluginIsActive:
             self.dlg = BdTopoExtractorDialog(None, self.iface, self.project)
-            self.dlg.show()
-            if self.dlg.result:
-                self.pluginIsActive = True
-                print("ok")
+        self.dlg.show()
+        result = self.dlg.exec_()
+        if result:
+            self.pluginIsActive = True
+            print(self.dlg.extent)
+            request = WfsRequest(
+                url="https://wxs.ign.fr/topographie/geoportail/wfs",
+                layer="BDTOPO_V3:epci",
+                crs="4326",
+                boundingbox=self.dlg.extent,
+            )
