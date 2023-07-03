@@ -28,8 +28,6 @@ from bd_topo_extractor.gui.dlg_settings import BdTopoExtractorDialog
 
 from bd_topo_extractor.processing import BdTopoExtractorProvider
 
-from bd_topo_extractor.processing import RectangleDrawTool
-
 from bd_topo_extractor.processing import WfsRequest
 
 from bd_topo_extractor.toolbelt import PlgLogger
@@ -192,8 +190,7 @@ class BdTopoExtractorPlugin:
         result = self.dlg.exec_()
         if result:
             self.pluginIsActive = True
-            print(self.dlg.extent)
-            request = WfsRequest(
+            WfsRequest(
                 url="https://wxs.ign.fr/topographie/geoportail/wfs",
                 layer="BDTOPO_V3:epci",
                 crs="4326",
