@@ -20,6 +20,7 @@ from qgis.PyQt import uic
 from qgis.PyQt.Qt import QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QIcon
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QPushButton
+from PyQt5.QtWidgets import QGridLayout, QCheckBox, QButtonGroup, QLabel
 
 # project
 from bd_topo_extractor.__about__ import (
@@ -33,6 +34,7 @@ from bd_topo_extractor.__about__ import (
 from bd_topo_extractor.toolbelt import PlgLogger, PlgOptionsManager
 from bd_topo_extractor.toolbelt.preferences import PlgSettingsStructure
 from bd_topo_extractor.processing import RectangleDrawTool
+from bd_topo_extractor.processing import GetCapabilitiesRequest
 
 # ############################################################################
 # ########## Globals ###############
@@ -59,33 +61,84 @@ class BdTopoExtractorDialog(QDialog):
         self.crs = self.project.crs()
         self.canvas = self.iface.mapCanvas()
         self.rectangle_tool = RectangleDrawTool(self.canvas)
+        self.getcapabilities = GetCapabilitiesRequest(
+            url="https://wxs.ign.fr/topographie/geoportail/wfs"
+        )
         self.layer = None
         self.new_crs = QgsCoordinateReferenceSystem()
         self.new_crs.createFromSrid(4326)
 
-        self.resize(400, 600)
+        # qself.resize(400, 600)
+
+        layout = QGridLayout()
+        extent_check_group = QButtonGroup(self)
+        extent_check_group.setExclusive(True)
 
         self.draw_rectangle_button = QPushButton(self)
-        self.draw_rectangle_button.setGeometry(30, 100, 150, 30)
+        # self.draw_rectangle_button.setGeometry(30, 100, 150, 30)
         self.draw_rectangle_button.clicked.connect(self.pointer)
         self.draw_rectangle_button.setText("Dessiner un rectangle")
+        layout.addWidget(self.draw_rectangle_button, 0, 2)
+
+        self.draw_rectangle_checkbox = QCheckBox(self)
+        self.draw_rectangle_checkbox.setText(
+            "Dessiner la zone à extraire sur la carte : "
+        )
+        self.draw_rectangle_checkbox.setChecked(True)
+        extent_check_group.addButton(self.draw_rectangle_checkbox)
+        layout.addWidget(self.draw_rectangle_checkbox, 0, 0)
 
         self.select_layer_combo_box = QgsMapLayerComboBox(self)
-        self.select_layer_combo_box.setGeometry(30, 120, 150, 30)
+        self.select_layer_combo_box.setEnabled(False)
+        # self.select_layer_combo_box.setGeometry(30, 120, 150, 30)
+        layout.addWidget(self.select_layer_combo_box, 1, 2)
+
+        self.select_layer_checkbox = QCheckBox(self)
+        self.select_layer_checkbox.setText(
+            "Utiliser l'emprise d'une couche pour l'extraction : "
+        )
+        self.select_layer_checkbox.setChecked(False)
+        extent_check_group.addButton(self.select_layer_checkbox)
+        layout.addWidget(self.select_layer_checkbox, 1, 0)
+
+        select_data_to_extract_label = QLabel(self)
+        select_data_to_extract_label.setText("Données à extraire de la BD TOPO®")
+        layout.addWidget(select_data_to_extract_label, 2, 0)
+        print(self.getcapabilities.service_layers)
 
         self.button_box = QDialogButtonBox(self)
+        self.button_box.setEnabled(False)
         self.button_box.setGeometry(30, 340, 341, 32)
         self.button_box.addButton("Ok", QDialogButtonBox.AcceptRole)
         self.button_box.addButton("Cancel", QDialogButtonBox.RejectRole)
+        layout.addWidget(self.button_box, 3, 2)
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
         self.accepted.connect(self.get_result)
         self.rejected.connect(self.disconnect)
         self.rectangle_tool.signal.connect(self.activate_window)
+        self.setLayout(layout)
+
+        self.draw_rectangle_checkbox.stateChanged.connect(
+            self.draw_rectangle_button.setEnabled
+        )
+        self.draw_rectangle_checkbox.stateChanged.connect(
+            self.select_layer_combo_box.setDisabled
+        )
+        self.draw_rectangle_checkbox.stateChanged.connect(self.button_box.setDisabled)
+
+        self.select_layer_checkbox.stateChanged.connect(
+            self.select_layer_combo_box.setEnabled
+        )
+        self.select_layer_checkbox.stateChanged.connect(
+            self.draw_rectangle_button.setDisabled
+        )
+        self.select_layer_checkbox.stateChanged.connect(self.button_box.setEnabled)
+        self.select_layer_checkbox.stateChanged.connect(self.erase_rubber_band)
 
     def get_result(self):
-        if self.rectangle_tool:
-            self.rectangle_tool.rubber_band.reset()
+        if self.draw_rectangle_checkbox.isChecked():
+            self.erase_rubber_band()
             self.canvas.unsetMapTool(self.rectangle_tool)
             self.extent = self.transform_crs(self.rectangle_tool.rectangle())
         else:
@@ -99,16 +152,23 @@ class BdTopoExtractorDialog(QDialog):
         transformed_extent = geom.boundingBox()
         return transformed_extent
 
+    def erase_rubber_band(self):
+        if self.rectangle_tool.rubber_band:
+            self.rectangle_tool.rubber_band.reset()
+        else:
+            pass
+
     def disconnect(self):
         if self.rectangle_tool:
             self.canvas.unsetMapTool(self.rectangle_tool)
-            self.rectangle_tool.rubber_band.reset()
+            self.erase_rubber_band()
 
     def pointer(self):
         self.canvas.setMapTool(self.rectangle_tool)
 
     def activate_window(self):
         self.activateWindow()
+        self.button_box.setEnabled(True)
 
 
 class ConfigOptionsPage(FORM_CLASS, QgsOptionsPageWidget):
