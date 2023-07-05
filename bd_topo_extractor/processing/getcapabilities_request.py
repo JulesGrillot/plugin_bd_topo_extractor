@@ -5,7 +5,7 @@ import requests
 class GetCapabilitiesRequest:
     def __init__(self, url=None):
         self.url = url
-        self.service_layers = self.list_layers()
+        self.service_layers, self.service_schema = self.list_layers()
 
     def list_layers(self):
         file = requests.get(
@@ -20,7 +20,8 @@ class GetCapabilitiesRequest:
             layer = re.search(string, word)
             if layer is not None:
                 list_layer_name = layer.group(1).split(":")
+                schema = list_layer_name[0]
                 list_layer_name.pop(0)
                 layer_name = ":".join(list_layer_name)
                 layers.append(layer_name)
-        return layers
+        return layers, schema

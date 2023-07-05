@@ -168,6 +168,7 @@ class BdTopoExtractorPlugin:
         self.pluginIsActive = False
 
     def run(self):
+        url = "https://wxs.ign.fr/topographie/geoportail/wfs"
         """Main process.
 
         :raises Exception: if there is no item in the feed
@@ -185,14 +186,27 @@ class BdTopoExtractorPlugin:
                 push=True,
             )
         if not self.pluginIsActive:
-            self.dlg = BdTopoExtractorDialog(None, self.iface, self.project)
+            self.dlg = BdTopoExtractorDialog(None, self.iface, self.project, url)
         self.dlg.show()
         result = self.dlg.exec_()
         if result:
+            if self.dlg.save_result_checkbox.isChecked():
+                path = self.dlg.line_edit_output_folder.text()
+            else:
+                path = None
+            for button in self.dlg.geom_button_group.buttons():
+                if button.isChecked():
+                    geom = button.accessibleName()
             self.pluginIsActive = True
-            WfsRequest(
-                url="https://wxs.ign.fr/topographie/geoportail/wfs",
-                layer="BDTOPO_V3:epci",
-                crs="4326",
-                boundingbox=self.dlg.extent,
-            )
+            for button in self.dlg.layer_check_group.buttons():
+                if button.isChecked():
+                    WfsRequest(
+                        iface=self.iface,
+                        url=url,
+                        layer=button.accessibleName(),
+                        crs="4326",
+                        boundingbox=self.dlg.extent,
+                        path=path,
+                        schema=self.dlg.schema,
+                        geom=geom,
+                    )
