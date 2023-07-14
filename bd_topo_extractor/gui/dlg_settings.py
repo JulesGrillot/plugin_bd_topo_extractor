@@ -7,6 +7,8 @@
 # standard
 from functools import partial
 from pathlib import Path
+import os
+import requests
 
 # PyQGIS
 from qgis.core import (
@@ -14,13 +16,22 @@ from qgis.core import (
     QgsGeometry,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
+    QgsMapLayerProxyModel,
+    QgsFeature,
+    QgsVectorLayer,
 )
-from qgis.gui import QgsOptionsPageWidget, QgsOptionsWidgetFactory, QgsMapLayerComboBox
+from qgis.gui import (
+    QgsOptionsPageWidget,
+    QgsOptionsWidgetFactory,
+    QgsMapLayerComboBox,
+    QgsProjectionSelectionWidget,
+)
 from qgis.PyQt import uic
 from qgis.PyQt.Qt import QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QIcon
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QPushButton
-from qgis.PyQt.QtCore import Qt
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QSize, QUrl
+from PyQt5.QtGui import QPixmap, QDesktopServices
 from PyQt5.QtWidgets import (
     QGridLayout,
     QCheckBox,
@@ -30,6 +41,8 @@ from PyQt5.QtWidgets import (
     QFileDialog,
     QWidget,
     QScrollArea,
+    QProgressBar,
+    QToolButton,
 )
 
 # project
@@ -40,6 +53,10 @@ from bd_topo_extractor.__about__ import (
     __uri_homepage__,
     __uri_tracker__,
     __version__,
+    __wfs_name__,
+    __wfs_logo__,
+    __wfs_metadata__,
+    __wfs_credit__,
 )
 from bd_topo_extractor.toolbelt import PlgLogger, PlgOptionsManager
 from bd_topo_extractor.toolbelt.preferences import PlgSettingsStructure
@@ -69,55 +86,107 @@ class BdTopoExtractorDialog(QDialog):
         self.iface = iface
         self.project = project
         self.url = url
-        self.crs = self.project.crs()
         self.canvas = self.iface.mapCanvas()
-        self.rectangle_tool = RectangleDrawTool(self.canvas)
         self.getcapabilities = GetCapabilitiesRequest(self.url)
+        self.rectangle_tool = RectangleDrawTool(
+            self.project, self.canvas, self.getcapabilities.max_bounding_box
+        )
         self.layer = None
-        self.new_crs = QgsCoordinateReferenceSystem()
-        self.new_crs.createFromSrid(4326)
+        self.rectangle = None
+        self.checked = 0
 
-        # qself.resize(400, 600)
-        self.setWindowTitle("BD TOPO® Extractor")
+        self.setWindowTitle(__title__)
 
         self.layout = QGridLayout()
         extent_check_group = QButtonGroup(self)
         extent_check_group.setExclusive(True)
+        layout_row_count = 0
 
-        self.draw_rectangle_button = QPushButton(self)
-        # self.draw_rectangle_button.setGeometry(30, 100, 150, 30)
-        self.draw_rectangle_button.clicked.connect(self.pointer)
-        self.draw_rectangle_button.setText("Dessiner un rectangle")
-        self.layout.addWidget(self.draw_rectangle_button, 0, 2, 1, 3)
+        # Source and credit
+        credit_label = QLabel(self)
+        credit_label.setText("Données fourniees par :")
+        self.layout.addWidget(credit_label, layout_row_count, 0)
+        layout_row_count = layout_row_count + 1
 
+        pixmap = QPixmap()
+        pixmap.loadFromData(requests.get(__wfs_logo__).content)
+        self.producer_label = QToolButton(self)
+        self.producer_label.setObjectName(__wfs_credit__)
+        icon = QIcon()
+        icon.addPixmap(pixmap)
+        self.producer_label.setIcon(icon)
+        # self.producer_label.setScaledContents(True)
+        self.producer_label.setIconSize(QSize(60, 60))
+        self.layout.addWidget(self.producer_label, layout_row_count, 0, 3, 3)
+
+        self.documentation_label = QToolButton(self)
+        self.documentation_label.setObjectName(__uri_homepage__)
+        self.documentation_label.setText("Documentation")
+        self.layout.addWidget(self.documentation_label, layout_row_count, 3, 1, 2)
+
+        self.metadata_label = QToolButton(self)
+        self.metadata_label.setObjectName(__wfs_metadata__)
+        self.metadata_label.setText("Metadata")
+        self.layout.addWidget(self.metadata_label, layout_row_count, 3, 3, 2)
+        layout_row_count = layout_row_count + 3
+
+        # Draw rectangle tool
         self.draw_rectangle_checkbox = QCheckBox(self)
         self.draw_rectangle_checkbox.setText(
             "Dessiner la zone à extraire sur la carte : "
         )
         self.draw_rectangle_checkbox.setChecked(True)
         extent_check_group.addButton(self.draw_rectangle_checkbox)
-        self.layout.addWidget(self.draw_rectangle_checkbox, 0, 0, 1, 2)
+        self.layout.addWidget(self.draw_rectangle_checkbox, layout_row_count, 0, 1, 2)
 
-        self.select_layer_combo_box = QgsMapLayerComboBox(self)
-        self.select_layer_combo_box.setEnabled(False)
-        # self.select_layer_combo_box.setGeometry(30, 120, 150, 30)
-        self.layout.addWidget(self.select_layer_combo_box, 1, 2, 1, 3)
+        self.draw_rectangle_button = QPushButton(self)
+        self.draw_rectangle_button.clicked.connect(self.pointer)
+        self.draw_rectangle_button.setText("Dessiner un rectangle")
+        self.layout.addWidget(self.draw_rectangle_button, layout_row_count, 2, 1, 3)
+        layout_row_count = layout_row_count + 1
 
+        # Select layer tool
         self.select_layer_checkbox = QCheckBox(self)
         self.select_layer_checkbox.setText(
             "Utiliser l'emprise d'une couche pour l'extraction : "
         )
         self.select_layer_checkbox.setChecked(False)
         extent_check_group.addButton(self.select_layer_checkbox)
-        self.layout.addWidget(self.select_layer_checkbox, 1, 0, 2, 2)
+        self.layout.addWidget(self.select_layer_checkbox, layout_row_count, 0, 2, 2)
 
+        self.select_layer_combo_box = QgsMapLayerComboBox(self)
+        self.select_layer_combo_box.setFilters(
+            QgsMapLayerProxyModel.PolygonLayer
+            | QgsMapLayerProxyModel.LineLayer
+            | QgsMapLayerProxyModel.RasterLayer
+        )
+        self.select_layer_combo_box.setEnabled(False)
+        self.layout.addWidget(self.select_layer_combo_box, layout_row_count, 2, 1, 3)
+        layout_row_count = layout_row_count + 2
+
+        # Show WFS max data extent
+        self.show_wfs_extent_checkbox = QCheckBox(self)
+        self.show_wfs_extent_checkbox.setText(
+            "Dessiner la zone à extraire sur la carte"
+        )
+        self.show_wfs_extent_checkbox.setChecked(False)
+        self.layout.addWidget(self.show_wfs_extent_checkbox, layout_row_count, 0, 1, 2)
+        layout_row_count = layout_row_count + 1
+
+        # Select data to extract from WFS
         select_data_to_extract_label = QLabel(self)
-        select_data_to_extract_label.setText("Données à extraire de la BD TOPO®")
-        self.layout.addWidget(select_data_to_extract_label, 3, 0)
+        select_data_to_extract_label.setText(
+            "Données à extraire de la {0}".format(__wfs_name__)
+        )
+        self.layout.addWidget(select_data_to_extract_label, layout_row_count, 0)
+        layout_row_count = layout_row_count + 1
 
         self.select_all_checkbox = QCheckBox(self)
-        self.select_all_checkbox.setText("Extraire toutes les données de la BD TOPO®")
-        self.layout.addWidget(self.select_all_checkbox, 4, 0)
+        self.select_all_checkbox.setText(
+            "Extraire toutes les données de la {0}".format(__wfs_name__)
+        )
+        self.layout.addWidget(self.select_all_checkbox, layout_row_count, 0)
+        layout_row_count = layout_row_count + 1
 
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -126,11 +195,12 @@ class BdTopoExtractorDialog(QDialog):
         self.scroll_area_content = QWidget()
         self.scroll_area_content.setGeometry(0, 0, 600, 920)
         self.scroll_area.setWidget(self.scroll_area_content)
-        self.layout.addWidget(self.scroll_area, 5, 0, 1, 5)
+        self.layout.addWidget(self.scroll_area, layout_row_count, 0, 1, -1)
         self.layer_check_group = QButtonGroup(self)
         self.layer_check_group.setExclusive(False)
         self.schema = self.getcapabilities.service_schema
         self.add_layers(self.getcapabilities.service_layers)
+        layout_row_count = layout_row_count + 1
 
         # Geom predicat
         self.geom_button_group = QButtonGroup(self)
@@ -139,40 +209,109 @@ class BdTopoExtractorDialog(QDialog):
         self.intersect_checkbox.setAccessibleName("intersect")
         self.intersect_checkbox.setChecked(True)
         self.intersect_checkbox.setText("Conserver les données intersectant l'emprise")
-        self.layout.addWidget(self.intersect_checkbox, 6, 0, 1, 2)
+        self.layout.addWidget(self.intersect_checkbox, layout_row_count, 0, 1, 2)
         self.geom_button_group.addButton(self.intersect_checkbox)
         self.within_checkbox = QCheckBox(self)
         self.within_checkbox.setAccessibleName("within")
         self.within_checkbox.setText("Découper les données")
-        self.layout.addWidget(self.within_checkbox, 6, 2, 1, 3)
+        self.layout.addWidget(self.within_checkbox, layout_row_count, 2, 1, 3)
         self.geom_button_group.addButton(self.within_checkbox)
+        layout_row_count = layout_row_count + 1
+
+        # Crs Selection
+        select_crs_label = QLabel(self)
+        select_crs_label.setText("Sélectionner une projection pour les exports :")
+        self.layout.addWidget(select_crs_label, layout_row_count, 0)
+        self.crs_selector = QgsProjectionSelectionWidget(self)
+        self.crs_selector.setCrs(self.project.crs())
+        self.layout.addWidget(self.crs_selector, layout_row_count, 2, 1, 3)
+        layout_row_count = layout_row_count + 1
+
+        # Add result to project
+        self.add_to_project_checkbox = QCheckBox(self)
+        self.add_to_project_checkbox.setText(
+            "Ajouter les données exportées au projet actuel"
+        )
+        self.add_to_project_checkbox.setChecked(True)
+        self.add_to_project_checkbox.setEnabled(False)
+        self.layout.addWidget(self.add_to_project_checkbox, layout_row_count, 0)
+        layout_row_count = layout_row_count + 1
 
         # Output folder selection
         self.save_result_checkbox = QCheckBox(self)
         self.save_result_checkbox.setText("Sauvergarder les résultats :")
-        self.layout.addWidget(self.save_result_checkbox, 7, 0)
+        self.layout.addWidget(self.save_result_checkbox, layout_row_count, 0)
+        layout_row_count = layout_row_count + 1
+
+        # Output format
+        self.output_format_button_group = QButtonGroup(self)
+        self.output_format_button_group.setExclusive(True)
+        self.gpkg_checkbox = QCheckBox(self)
+        self.gpkg_checkbox.setAccessibleName("gpkg")
+        self.gpkg_checkbox.setChecked(True)
+        self.gpkg_checkbox.setEnabled(False)
+        self.gpkg_checkbox.setText("GeoPackage")
+        self.layout.addWidget(self.gpkg_checkbox, layout_row_count, 0, 1, 2)
+        self.output_format_button_group.addButton(self.gpkg_checkbox, 0)
+        self.shp_checkbox = QCheckBox(self)
+        self.shp_checkbox.setAccessibleName("shp")
+        self.shp_checkbox.setEnabled(False)
+        self.shp_checkbox.setText("Shapefile")
+        self.layout.addWidget(self.shp_checkbox, layout_row_count, 1, 1, 3)
+        self.output_format_button_group.addButton(self.shp_checkbox, 1)
+        self.geojson_checkbox = QCheckBox(self)
+        self.geojson_checkbox.setAccessibleName("geojson")
+        self.geojson_checkbox.setEnabled(False)
+        self.geojson_checkbox.setText("GeoJSON")
+        self.layout.addWidget(self.geojson_checkbox, layout_row_count, 3, 1, 3)
+        self.output_format_button_group.addButton(self.geojson_checkbox, 2)
+        layout_row_count = layout_row_count + 1
+
         label_output = QLabel(self)
         label_output.setText("Parcourir les dossiers :")
-        self.layout.addWidget(label_output, 8, 0)
+        self.layout.addWidget(label_output, layout_row_count, 0)
         self.line_edit_output_folder = QLineEdit(self)
-        self.layout.addWidget(self.line_edit_output_folder, 8, 1, 1, 3)
+        self.line_edit_output_folder.setEnabled(False)
+        self.layout.addWidget(self.line_edit_output_folder, layout_row_count, 1, 1, 3)
         button_output_folder = QPushButton(self)
+        button_output_folder.setEnabled(False)
         button_output_folder.setText("...")
         button_output_folder.clicked.connect(self.select_output_folder)
-        self.layout.addWidget(button_output_folder, 8, 4)
+        self.layout.addWidget(button_output_folder, layout_row_count, 4)
+        layout_row_count = layout_row_count + 1
 
+        # Accept and reject button box
         self.button_box = QDialogButtonBox(self)
         self.button_box.setEnabled(False)
-        # self.button_box.setGeometry(30, 340, 341, 32)
         self.button_box.addButton("Ok", QDialogButtonBox.AcceptRole)
         self.button_box.addButton("Cancel", QDialogButtonBox.RejectRole)
-        self.layout.addWidget(self.button_box, 9, 3)
+        self.layout.addWidget(self.button_box, layout_row_count, 2, 2, 3)
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
         self.accepted.connect(self.get_result)
         self.rejected.connect(self.disconnect)
         self.rectangle_tool.signal.connect(self.activate_window)
+        layout_row_count = layout_row_count + 2
+
+        # Progress Bar
+        self.select_progress_bar_label = QLabel(self)
+        self.select_progress_bar_label.setText("")
+        self.layout.addWidget(self.select_progress_bar_label, layout_row_count, 0)
+        layout_row_count = layout_row_count + 1
+
+        self.progress_bar = QProgressBar(self)
+        self.progress_bar.setValue(0)
+        self.thread = Thread()
+        self.thread._signal.connect(self.signal_accept)
+        self.layout.addWidget(self.progress_bar, layout_row_count, 0, 1, -1)
+
+        # Add layout
         self.setLayout(self.layout)
+
+        # Ui signals
+        self.producer_label.clicked.connect(self.open_url)
+        self.metadata_label.clicked.connect(self.open_url)
+        self.documentation_label.clicked.connect(self.open_url)
 
         self.draw_rectangle_checkbox.stateChanged.connect(
             self.draw_rectangle_button.setEnabled
@@ -181,6 +320,7 @@ class BdTopoExtractorDialog(QDialog):
             self.select_layer_combo_box.setDisabled
         )
         self.draw_rectangle_checkbox.stateChanged.connect(self.button_box.setDisabled)
+        self.draw_rectangle_checkbox.stateChanged.connect(self.check_rectangle)
 
         self.select_layer_checkbox.stateChanged.connect(
             self.select_layer_combo_box.setEnabled
@@ -188,25 +328,104 @@ class BdTopoExtractorDialog(QDialog):
         self.select_layer_checkbox.stateChanged.connect(
             self.draw_rectangle_button.setDisabled
         )
+
         self.select_layer_checkbox.stateChanged.connect(self.button_box.setEnabled)
         self.select_layer_checkbox.stateChanged.connect(self.erase_rubber_band)
+        self.select_layer_checkbox.stateChanged.connect(self.check_rectangle)
+        self.show_wfs_extent_checkbox.stateChanged.connect(self.show_max_extent)
+
         self.select_all_checkbox.stateChanged.connect(self.select_all)
+        self.select_all_checkbox.stateChanged.connect(self.check_path)
+
+        self.save_result_checkbox.stateChanged.connect(button_output_folder.setEnabled)
+        self.save_result_checkbox.stateChanged.connect(
+            self.line_edit_output_folder.setEnabled
+        )
+        self.save_result_checkbox.stateChanged.connect(self.check_path)
+        self.save_result_checkbox.stateChanged.connect(
+            self.add_to_project_checkbox.setEnabled
+        )
+        self.save_result_checkbox.stateChanged.connect(self.gpkg_checkbox.setEnabled)
+        self.save_result_checkbox.stateChanged.connect(self.shp_checkbox.setEnabled)
+        self.save_result_checkbox.stateChanged.connect(self.geojson_checkbox.setEnabled)
+
+        self.line_edit_output_folder.textEdited.connect(self.check_path)
+
+    def open_url(self):
+        url = QUrl(self.sender().objectName())
+        QDesktopServices.openUrl(url)
+
+    def show_max_extent(self, value):
+        if value == 0:
+            self.project.instance().removeMapLayer(self.max_extent_layer)
+            self.canvas.refresh()
+        else:
+            self.max_extent_layer = QgsVectorLayer(
+                "Polygon?crs=epsg:4326", "Max extent", "memory"
+            )
+            self.max_extent_layer.startEditing()
+            new_geom = QgsGeometry().fromRect(self.getcapabilities.max_bounding_box)
+            new_feature = QgsFeature(self.max_extent_layer.fields())
+            new_feature.setGeometry(new_geom)
+            self.max_extent_layer.dataProvider().addFeatures([new_feature])
+            self.max_extent_layer.updateExtents()
+            self.max_extent_layer.commitChanges()
+            self.max_extent_layer.triggerRepaint()
+            style_path: Path = (
+                DIR_PLUGIN_ROOT / f"resources/styles/max_extent_style.qml"
+            )
+            self.max_extent_layer.loadNamedStyle(style_path.__str__())
+            self.project.instance().addMapLayer(self.max_extent_layer)
+            self.canvas.refresh()
 
     def get_result(self):
         if self.draw_rectangle_checkbox.isChecked():
             self.erase_rubber_band()
             self.canvas.unsetMapTool(self.rectangle_tool)
-            self.extent = self.transform_crs(self.rectangle_tool.rectangle())
+            self.extent = self.transform_crs(
+                self.rectangle_tool.rectangle(),
+                QgsCoordinateReferenceSystem("EPSG:4326"),
+            )
         else:
             self.layer = self.select_layer_combo_box.currentLayer()
-            self.crs = self.layer.crs()
-            self.extent = self.transform_crs(self.layer.extent())
+            self.extent = self.transform_crs(self.layer.extent(), self.layer.crs())
+
+    def signal_accept(self, msg):
+        self.progress_bar.setValue(int(msg))
+        if self.progress_bar.value() == 101:
+            self.progress_bar.setValue(0)
+
+    def output_format(self):
+        format = ""
+        for button in self.output_format_button_group.buttons():
+            if button.isChecked():
+                format = button.accessibleName()
+        return format
 
     def select_output_folder(self):
         my_dir = QFileDialog.getExistingDirectory(
             self, "Select a folder", "", QFileDialog.ShowDirsOnly
         )
         self.line_edit_output_folder.setText(my_dir)
+        self.check_path()
+
+    def check_path(self):
+        if self.rectangle:
+            if self.checked > 0:
+                if self.save_result_checkbox.isChecked():
+                    if os.path.exists(self.line_edit_output_folder.text()):
+                        self.button_box.setEnabled(True)
+                    else:
+                        self.button_box.setEnabled(False)
+                else:
+                    self.button_box.setEnabled(True)
+            else:
+                self.button_box.setEnabled(False)
+        else:
+            self.button_box.setEnabled(False)
+        if not self.save_result_checkbox.isChecked():
+            self.add_to_project_checkbox.setChecked(True)
+            self.gpkg_checkbox.setChecked(True)
 
     def select_all(self):
         if self.select_all_checkbox.isChecked():
@@ -245,6 +464,7 @@ class BdTopoExtractorDialog(QDialog):
             text_with_spaces = first_part + "\n" + second_part
             checkbox.setText(text_with_spaces.capitalize())
             checkbox.setAccessibleName(self.schema + ":" + str(layer))
+            checkbox.stateChanged.connect(self.check_result)
             self.layer_check_group.addButton(checkbox)
             layout.addWidget(checkbox, row, column)
             if column != 2:
@@ -254,9 +474,27 @@ class BdTopoExtractorDialog(QDialog):
                 column = 0
         return row, column
 
-    def transform_crs(self, rectangle):
+    def check_result(self, value):
+        if value == 0:
+            self.checked = self.checked - 1
+        else:
+            self.checked = self.checked + 1
+        self.check_path()
+
+    def check_rectangle(self):
+        if self.select_layer_checkbox.isChecked():
+            if self.select_layer_combo_box is None:
+                self.rectangle = None
+            else:
+                self.rectangle = True
+        elif self.draw_rectangle_checkbox.isChecked():
+            self.rectangle = None
+
+    def transform_crs(self, rectangle, input_crs):
         geom = QgsGeometry().fromRect(rectangle)
-        geom.transform(QgsCoordinateTransform(self.crs, self.new_crs, self.project))
+        geom.transform(
+            QgsCoordinateTransform(input_crs, self.project.crs(), self.project)
+        )
         transformed_extent = geom.boundingBox()
         return transformed_extent
 
@@ -278,8 +516,35 @@ class BdTopoExtractorDialog(QDialog):
 
     def activate_window(self):
         self.activateWindow()
+        self.rectangle = True
+        self.check_path()
         # if self.layer_check_group.checkedButton():
-        self.button_box.setEnabled(True)
+        # self.button_box.setEnabled(True)
+
+
+class Thread(QThread):
+    _signal = pyqtSignal(int)
+
+    def __init__(self):
+        super(Thread, self).__init__()
+        self.max_value = 1
+        self.value = 0
+
+    def __del__(self):
+        self.wait()
+
+    def set_max(self, max_value):
+        self.max_value = max_value
+
+    def add_one(self):
+        self.value = self.value + 1
+        self._signal.emit((self.value / self.max_value) * 100)
+
+    def finish(self):
+        self._signal.emit(101)
+
+    def reset_value(self):
+        self.value = 0
 
 
 class ConfigOptionsPage(FORM_CLASS, QgsOptionsPageWidget):

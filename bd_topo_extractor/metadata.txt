@@ -1,9 +1,9 @@
 [general]
-name=BD Topo Extractor
-about=It allows the user to extract elements from IGN's BD Topo with an extent or inside a layer as reference.
+name=Extractor
+about=It allows the user to extract elements from IGN's BD TOPO® with an extent or inside a layer as reference.
 category=Vector
 hasProcessingProvider=yes
-description=It allows the user to extract elements from IGN's BD Topo with an extent or inside a layer as reference. You cans select wich element you want to extract.
+description=It allows the user to extract elements from IGN's BD TOPO® with an extent or inside a layer as reference. You cans select wich element you want to extract.
 icon=resources/images/default_icon.png
 tags=vector
 
@@ -23,3 +23,10 @@ qgisMaximumVersion=3.99
 # versioning
 version=0.1.0
 changelog=
+
+[wfs]
+name=BD TOPO®
+uri=https://wxs.ign.fr/topographie/geoportail/wfs
+metadata=https://geoservices.ign.fr/bdtopo
+producer=https://www.ign.fr/
+logo=https://www.ign.fr/sites/default/files/styles/thumbnail/public/2020-06/logoIGN_300x200.png

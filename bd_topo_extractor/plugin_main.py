@@ -7,9 +7,16 @@
 # standard
 from functools import partial
 from pathlib import Path
+import datetime
+import os.path
 
 # PyQGIS
-from qgis.core import QgsApplication, QgsSettings, QgsProject
+from qgis.core import (
+    QgsApplication,
+    QgsSettings,
+    QgsProject,
+    QgsVectorLayer,
+)
 from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import QCoreApplication, QLocale, QTranslator, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QIcon
@@ -21,6 +28,7 @@ from bd_topo_extractor.__about__ import (
     __icon_path__,
     __title__,
     __uri_homepage__,
+    __wfs_uri__,
 )
 from bd_topo_extractor.gui.dlg_settings import PlgOptionsFactory
 
@@ -50,6 +58,7 @@ class BdTopoExtractorPlugin:
         self.log = PlgLogger().log
         self.provider = None
         self.pluginIsActive = False
+        self.url = __wfs_uri__
 
         # translation
         # initialize the locale
@@ -75,7 +84,7 @@ class BdTopoExtractorPlugin:
         # -- Actions
         self.action_launch = QAction(
             QIcon(str(__icon_path__)),
-            self.tr("BD Topo Extractor"),
+            self.tr(__title__),
             self.iface.mainWindow(),
         )
         self.iface.addToolBarIcon(self.action_launch)
@@ -168,7 +177,6 @@ class BdTopoExtractorPlugin:
         self.pluginIsActive = False
 
     def run(self):
-        url = "https://wxs.ign.fr/topographie/geoportail/wfs"
         """Main process.
 
         :raises Exception: if there is no item in the feed
@@ -186,27 +194,129 @@ class BdTopoExtractorPlugin:
                 push=True,
             )
         if not self.pluginIsActive:
-            self.dlg = BdTopoExtractorDialog(None, self.iface, self.project, url)
-        self.dlg.show()
-        result = self.dlg.exec_()
-        if result:
-            if self.dlg.save_result_checkbox.isChecked():
-                path = self.dlg.line_edit_output_folder.text()
-            else:
-                path = None
-            for button in self.dlg.geom_button_group.buttons():
-                if button.isChecked():
-                    geom = button.accessibleName()
             self.pluginIsActive = True
-            for button in self.dlg.layer_check_group.buttons():
-                if button.isChecked():
-                    WfsRequest(
-                        iface=self.iface,
-                        url=url,
-                        layer=button.accessibleName(),
-                        crs="4326",
-                        boundingbox=self.dlg.extent,
-                        path=path,
-                        schema=self.dlg.schema,
-                        geom=geom,
+            self.dlg = BdTopoExtractorDialog(None, self.iface, self.project, self.url)
+            self.dlg.show()
+            if len(self.project.instance().mapLayers()) == 0:
+                # Type of WMTS, url and name
+                type = "xyz"
+                url = "http://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                name = "OpenStreetMap"
+
+                # Uri's creation based on type and url
+                uri = "type=" + type + "&url=" + url
+
+                # Add WMTS to the QgsProject
+                self.iface.addRasterLayer(uri, name, "wms")
+                # DOESNT WORK
+                # zoomed_extent = self.dlg.transform_crs(
+                #     self.dlg.getcapabilities.max_bounding_box,
+                #     QgsCoordinateReferenceSystem("EPSG:4326"),
+                # )
+                # self.iface.mapCanvas().setExtent(zoomed_extent)
+                # self.iface.mapCanvas().refresh()
+            result = self.dlg.exec_()
+            if result:
+                self.processing()
+            else:
+                self.pluginIsActive = False
+        else:
+            self.dlg.activateWindow()
+
+    def processing(self):
+        self.dlg.show()
+        today = datetime.datetime.now()
+        year = today.year
+        month = today.month
+        day = today.day
+        hour = today.hour
+        minute = today.minute
+        folder = (
+            "BDTopoExport_"
+            + str(year)
+            + str(month)
+            + str(day)
+            + "_"
+            + str(hour)
+            + str(minute)
+        )
+        if self.dlg.save_result_checkbox.isChecked():
+            path = self.dlg.line_edit_output_folder.text() + "/" + str(folder)
+            if not os.path.exists(path):
+                os.makedirs(path)
+        else:
+            path = None
+
+        if self.dlg.add_to_project_checkbox.isChecked():
+            self.project.instance().layerTreeRoot().insertGroup(0, folder)
+            group = self.project.instance().layerTreeRoot().findGroup(folder)
+        for button in self.dlg.geom_button_group.buttons():
+            if button.isChecked():
+                geom = button.accessibleName()
+
+        max = 0
+        for button in self.dlg.layer_check_group.buttons():
+            if button.isChecked():
+                max = max + 1
+        self.dlg.thread.set_max(max)
+        n = 0
+        error_list = []
+        good_list = []
+        for button in self.dlg.layer_check_group.buttons():
+            if button.isChecked():
+                request = WfsRequest(
+                    project=self.project,
+                    iface=self.iface,
+                    url=self.url,
+                    data=button.accessibleName(),
+                    crs=self.dlg.crs_selector.crs(),
+                    boundingbox=self.dlg.extent,
+                    path=path,
+                    schema=self.dlg.schema,
+                    geom=geom,
+                    format=self.dlg.output_format(),
+                    error=error_list,
+                    good=good_list,
+                )
+                if request.final_layer and self.dlg.add_to_project_checkbox.isChecked():
+                    if (
+                        self.dlg.output_format() != "gpkg"
+                        or self.dlg.output_format() == "gpkg"
+                        and not self.dlg.save_result_checkbox.isChecked()
+                    ):
+                        self.project.instance().addMapLayer(request.final_layer, False)
+                        group.addLayer(request.final_layer)
+                n = n + 1
+                self.dlg.thread.add_one()
+                self.dlg.select_progress_bar_label.setText(
+                    "Données téléchargées : " + str(n) + "/" + str(max)
+                )
+        if (
+            self.dlg.output_format() == "gpkg"
+            and self.dlg.save_result_checkbox.isChecked()
+        ):
+            if (len(good_list) / n) > 0:
+                gpkg = QgsVectorLayer(request.final_layer, "", "ogr")
+                layers = gpkg.dataProvider().subLayers()
+                for layer in layers:
+                    name = layer.split("!!::!!")[1]
+                    uri = "%s|layername=%s" % (
+                        request.final_layer,
+                        name,
                     )
+                    # Create layer
+                    final_layer = QgsVectorLayer(uri, name, "ogr")
+                    self.project.instance().addMapLayer(final_layer, False)
+                    group.addLayer(final_layer)
+
+        print(error_list)
+        print(good_list)
+        print("Nb d'erreurs : " + str(len(error_list)))
+        print("Nb de données : " + str(len(good_list)))
+        print("Sur : " + str(n))
+        self.dlg.thread.finish()
+        self.dlg.select_progress_bar_label.setText("")
+        self.dlg.thread.reset_value()
+        self.dlg.close()
+        self.pluginIsActive = False
+        # self.pluginIsActive = None

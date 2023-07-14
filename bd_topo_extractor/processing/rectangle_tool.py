@@ -1,5 +1,12 @@
 from qgis.gui import QgsMapTool, QgsMapMouseEvent, QgsRubberBand
-from qgis.core import QgsPointXY, QgsWkbTypes, QgsRectangle
+from qgis.core import (
+    QgsPointXY,
+    QgsWkbTypes,
+    QgsRectangle,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsGeometry,
+)
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt, pyqtSignal
 
@@ -7,12 +14,14 @@ from PyQt5.QtCore import Qt, pyqtSignal
 class RectangleDrawTool(QgsMapTool):
     signal = pyqtSignal()
 
-    def __init__(self, canvas=None):
+    def __init__(self, project=None, canvas=None, max_extent=None):
         super().__init__(canvas)
 
         self.signal.connect(self.deactivate)
 
+        self.project = project
         self.canvas = canvas
+        self.max_extent = max_extent
         self.start_point = None
         self.end_point = None
         self.new_extent = None
@@ -77,7 +86,53 @@ class RectangleDrawTool(QgsMapTool):
             or self.start_point.y() == self.end_point.y()
         ):
             return None
-        return QgsRectangle(self.start_point, self.end_point)
+        else:
+            if str(self.project.instance().crs().postgisSrid()) != "4326":
+                start_point = self.transform_geom(
+                    QgsGeometry().fromPointXY(self.start_point),
+                    self.project.instance().crs(),
+                    QgsCoordinateReferenceSystem("EPSG:4326"),
+                )
+                self.start_point = QgsPointXY(
+                    start_point.asPoint().x(), start_point.asPoint().y()
+                )
+                end_point = self.transform_geom(
+                    QgsGeometry().fromPointXY(self.end_point),
+                    self.project.instance().crs(),
+                    QgsCoordinateReferenceSystem("EPSG:4326"),
+                )
+                self.end_point = QgsPointXY(
+                    end_point.asPoint().x(), end_point.asPoint().y()
+                )
+
+            if self.max_extent.intersects(
+                QgsRectangle(self.start_point, self.end_point)
+            ):
+                drawned_rectangle = self.transform_geom(
+                    QgsGeometry().fromRect(
+                        QgsRectangle(self.start_point, self.end_point)
+                    ),
+                    QgsCoordinateReferenceSystem("EPSG:4326"),
+                    QgsCoordinateReferenceSystem("EPSG:3857"),
+                )
+                transformed_extent = drawned_rectangle.boundingBox()
+                print(transformed_extent.area())
+                print("MESSAGE WARNING")
+                return QgsRectangle(self.start_point, self.end_point)
+            else:
+                print(QgsRectangle(self.start_point, self.end_point))
+                print(self.max_extent)
+                print("MESSAGE D'ERREUR")
+
+    def transform_geom(self, geom, input_crs, output_crs):
+        geom.transform(
+            QgsCoordinateTransform(
+                input_crs,
+                output_crs,
+                self.project,
+            )
+        )
+        return geom
 
     def getExtent(self):
         return self.new_extent

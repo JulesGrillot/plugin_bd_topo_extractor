@@ -4,9 +4,6 @@
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
-
-
-
 ## Generated options
 
 ### Plugin
@@ -17,17 +14,17 @@
 | Plugin name slugified | bd_topo_extractor |
 | Plugin name class (used in code) | BdTopoExtractor |
 | Plugin category | Vector |
-| Plugin description short | It allows the user to extract elements from IGN's BD Topo with an extent or inside a layer as reference. |
-| Plugin description long | It allows the user to extract elements from IGN's BD Topo with an extent or inside a layer as reference. You cans select wich element you want to extract. |
+| Plugin description short | It allows the user to extract elements from IGN's BD Topo with an extent of a drawn rectangle or from layer. |
+| Plugin description long | It allows the user to extract elements from IGN's BD Topo with an extent of a drawn rectangle or from layer. You can select wich element you want to extract,from the database. Choose if you want to keep it as a memory layer or directly save it into a folder. It's also possible to select if you want the intersecting data or the data within the selected extent. |
 | Plugin tags | vector |
 | Plugin icon | default_icon.png |
 | Plugin with processing provider | yes |
 | Author name | Jules GRILLOT |
 | Author organization | Company |
-| Author email | jules.grillot@gmail.com |
+| Author email | <jules.grillot@gmail.com> |
 | Minimum QGIS version | 3.10 |
 | Maximum QGIS version | 3.99 |
-| Git repository URL | https://github.com/JulesGrillot/bd_topo_extractor |
+| Git repository URL | <https://github.com/JulesGrillot/plugin_bd_topo_extractor> |
 | Git default branch | main |
 | License | None |
 | Python linter | None |
@@ -49,16 +46,15 @@ See also: [contribution guidelines](CONTRIBUTING.md).
 
 Plugin is linted, tested, packaged and published with GitHub.
 
-If you mean to deploy it to the [official QGIS plugins repository](https://plugins.qgis.org/), remember to set your OSGeo credentials (`OSGEO_USER_NAME` and `OSGEO_USER_PASSWORD`) as environment variables in your CI/CD tool. 
-
+If you mean to deploy it to the [official QGIS plugins repository](https://plugins.qgis.org/), remember to set your OSGeo credentials (`OSGEO_USER_NAME` and `OSGEO_USER_PASSWORD`) as environment variables in your CI/CD tool.
 
 ### Documentation
 
 The documentation is generated using Sphinx and is automatically generated through the CI and published on Pages.
 
-- homepage: <https://github.com/JulesGrillot/bd_topo_extractor>
-- repository: <https://github.com/JulesGrillot/bd_topo_extractor>
-- tracker: <https://github.com/JulesGrillot/bd_topo_extractor/issues>
+- homepage: <https://github.com/JulesGrillot/plugin_bd_topo_extractor>
+- repository: <https://github.com/JulesGrillot/plugin_bd_topo_extractor>
+- tracker: <https://github.com/JulesGrillot/plugin_bd_topo_extractor/issues>
 
 ----
 
