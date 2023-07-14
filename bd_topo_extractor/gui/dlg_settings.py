@@ -30,8 +30,8 @@ from qgis.PyQt import uic
 from qgis.PyQt.Qt import QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QIcon
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QPushButton
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QSize, QUrl
-from PyQt5.QtGui import QPixmap, QDesktopServices
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QSize
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (
     QGridLayout,
     QCheckBox,
@@ -78,9 +78,15 @@ FORM_CLASS, _ = uic.loadUiType(
 
 
 class BdTopoExtractorDialog(QDialog):
-    def __init__(self, parent=None, iface=None, project=None, url=None):
-        """Constructor."""
-        super(BdTopoExtractorDialog, self).__init__(parent)
+    def __init__(self, project=None, iface=None, url=None):
+        """Constructor.
+        :param 
+        project: The current QGIS project instance
+        iface: An interface instance that will be passed to this class which \
+        provides the hook by which you can manipulate the QGIS application at run time.
+        url: The wfs url
+        """
+        super(BdTopoExtractorDialog, self).__init__()
         self.setObjectName("{}".format(__title__))
 
         self.iface = iface

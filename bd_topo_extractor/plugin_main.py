@@ -9,6 +9,7 @@ from functools import partial
 from pathlib import Path
 import datetime
 import os.path
+from urllib import request
 
 # PyQGIS
 from qgis.core import (
@@ -18,9 +19,10 @@ from qgis.core import (
     QgsVectorLayer,
 )
 from qgis.gui import QgisInterface
-from qgis.PyQt.QtCore import QCoreApplication, QLocale, QTranslator, QUrl
+from qgis.PyQt.QtCore import QCoreApplication, QLocale, QTranslator, QUrl, pyqtSlot
 from qgis.PyQt.QtGui import QDesktopServices, QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtWidgets import QAction, QMessageBox
+from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager, QNetworkReply
 
 # project
 from bd_topo_extractor.__about__ import (
@@ -193,38 +195,58 @@ class BdTopoExtractorPlugin:
                 log_level=2,
                 push=True,
             )
+        # Check if plugin is already launched
         if not self.pluginIsActive:
-            self.pluginIsActive = True
-            self.dlg = BdTopoExtractorDialog(None, self.iface, self.project, self.url)
-            self.dlg.show()
-            if len(self.project.instance().mapLayers()) == 0:
-                # Type of WMTS, url and name
-                type = "xyz"
-                url = "http://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                name = "OpenStreetMap"
+            if self.check_connexion():
+                self.pluginIsActive = True
+                # Open Dialog
+                self.dlg = BdTopoExtractorDialog(self.project, self.iface, self.url)
+                self.dlg.show()
+                # If there is no layers, an OSM layer is added to simplify the rectangle drawing
+                if len(self.project.instance().mapLayers()) == 0:
+                    # Type of WMTS, url and name
+                    type = "xyz"
+                    url = "http://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    name = "OpenStreetMap"
+                    uri = "type=" + type + "&url=" + url
 
-                # Uri's creation based on type and url
-                uri = "type=" + type + "&url=" + url
-
-                # Add WMTS to the QgsProject
-                self.iface.addRasterLayer(uri, name, "wms")
-                # DOESNT WORK
-                # zoomed_extent = self.dlg.transform_crs(
-                #     self.dlg.getcapabilities.max_bounding_box,
-                #     QgsCoordinateReferenceSystem("EPSG:4326"),
-                # )
-                # self.iface.mapCanvas().setExtent(zoomed_extent)
-                # self.iface.mapCanvas().refresh()
-            result = self.dlg.exec_()
-            if result:
-                self.processing()
+                    # Add WMTS to the QgsProject
+                    self.iface.addRasterLayer(uri, name, "wms")
+                    # Zoom on the WFS max extent
+                    # DOESNT WORK
+                    # zoomed_extent = self.dlg.transform_crs(
+                    #     self.dlg.getcapabilities.max_bounding_box,
+                    #     QgsCoordinateReferenceSystem("EPSG:4326"),
+                    # )
+                    # self.iface.mapCanvas().setExtent(zoomed_extent)
+                    # self.iface.mapCanvas().refresh()
+                result = self.dlg.exec_()
+                if result:
+                    # If dialog is accepted, "OK" is pressed, the process is launch
+                    self.processing()
+                else:
+                    # Else the dialog close and plugin can be launched again
+                    self.pluginIsActive = False
             else:
-                self.pluginIsActive = False
+                # If the user does not have an internet connexion, the plugin does not launch.
+                msg = QMessageBox()
+                msg.critical(None, "Info", "You are not connected to the Internet.")
+        # If the plugin is already launched, clicking on the plugin icon will
+        # put back the window on top
         else:
             self.dlg.activateWindow()
 
     def processing(self):
+        """Processing chain if the dialog is accepted
+        Depending on user's choices, a folder can be created, the wfs is
+        requested and the layers in the specific extent can be added to
+        the QGIS project
+
+        """
+        # Show the dialog back for the ProgressBar
         self.dlg.show()
+
+        # Creation of the folder name
         today = datetime.datetime.now()
         year = today.year
         month = today.month
@@ -241,27 +263,32 @@ class BdTopoExtractorPlugin:
             + str(minute)
         )
         if self.dlg.save_result_checkbox.isChecked():
+            # Creation of the folder
             path = self.dlg.line_edit_output_folder.text() + "/" + str(folder)
             if not os.path.exists(path):
                 os.makedirs(path)
         else:
             path = None
 
+        # Creation of a group of layers to store the results of the request
         if self.dlg.add_to_project_checkbox.isChecked():
             self.project.instance().layerTreeRoot().insertGroup(0, folder)
             group = self.project.instance().layerTreeRoot().findGroup(folder)
+        # Fetch if the results must be clipped or kept full
         for button in self.dlg.geom_button_group.buttons():
             if button.isChecked():
-                geom = button.accessibleName()
-
+                result_geometry = button.accessibleName()
+        # Fetch the number of data requested by the user
         max = 0
         for button in self.dlg.layer_check_group.buttons():
             if button.isChecked():
                 max = max + 1
+        # Set the ProgressBar
         self.dlg.thread.set_max(max)
         n = 0
         error_list = []
         good_list = []
+        # Download the layer for every data asked by the user
         for button in self.dlg.layer_check_group.buttons():
             if button.isChecked():
                 request = WfsRequest(
@@ -273,12 +300,16 @@ class BdTopoExtractorPlugin:
                     boundingbox=self.dlg.extent,
                     path=path,
                     schema=self.dlg.schema,
-                    geom=geom,
+                    geom=result_geometry,
                     format=self.dlg.output_format(),
                     error=error_list,
                     good=good_list,
                 )
+                # If a layer is created and needs to be added to the project
                 if request.final_layer and self.dlg.add_to_project_checkbox.isChecked():
+                    # If output format is a SHP or a GEOJSON or if the
+                    # layers are not saved. Saved GPKG are processed
+                    # differently.
                     if (
                         self.dlg.output_format() != "gpkg"
                         or self.dlg.output_format() == "gpkg"
@@ -286,15 +317,21 @@ class BdTopoExtractorPlugin:
                     ):
                         self.project.instance().addMapLayer(request.final_layer, False)
                         group.addLayer(request.final_layer)
+                    else:
+                        print("ERROR MESSAGE")
+                # Increase the ProgressBar value
                 n = n + 1
                 self.dlg.thread.add_one()
                 self.dlg.select_progress_bar_label.setText(
                     "Données téléchargées : " + str(n) + "/" + str(max)
                 )
+        # If the user wants a saved GPKG
         if (
             self.dlg.output_format() == "gpkg"
             and self.dlg.save_result_checkbox.isChecked()
         ):
+            # If a layer as been saved, the GPKG is opened and every layer are
+            # added to the project
             if (len(good_list) / n) > 0:
                 gpkg = QgsVectorLayer(request.final_layer, "", "ogr")
                 layers = gpkg.dataProvider().subLayers()
@@ -314,9 +351,17 @@ class BdTopoExtractorPlugin:
         print("Nb d'erreurs : " + str(len(error_list)))
         print("Nb de données : " + str(len(good_list)))
         print("Sur : " + str(n))
+        # Once it's finished, the ProgressBar is set back to 0
         self.dlg.thread.finish()
         self.dlg.select_progress_bar_label.setText("")
         self.dlg.thread.reset_value()
         self.dlg.close()
         self.pluginIsActive = False
-        # self.pluginIsActive = None
+
+    def check_connexion(self):
+        """A network connexion is required to use the plugin"""
+        try:
+            request.urlopen("https://github.com/", timeout=1)
+            return True
+        except request.URLError as err:
+            return False
