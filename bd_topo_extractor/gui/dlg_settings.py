@@ -34,6 +34,8 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal, QSize
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (
     QGridLayout,
+    QVBoxLayout,
+    QHBoxLayout,
     QCheckBox,
     QButtonGroup,
     QLabel,
@@ -43,6 +45,8 @@ from PyQt5.QtWidgets import (
     QScrollArea,
     QProgressBar,
     QToolButton,
+    QSpacerItem,
+    QSizePolicy,
 )
 
 # project
@@ -103,16 +107,16 @@ class BdTopoExtractorDialog(QDialog):
 
         self.setWindowTitle(__title__)
 
-        self.layout = QGridLayout()
+        self.layout = QVBoxLayout()
         extent_check_group = QButtonGroup(self)
         extent_check_group.setExclusive(True)
         layout_row_count = 0
 
         # Source and credit
+        self.source_doc_layout = QGridLayout()
         credit_label = QLabel(self)
-        credit_label.setText("Données fourniees par :")
-        self.layout.addWidget(credit_label, layout_row_count, 0)
-        layout_row_count = layout_row_count + 1
+        credit_label.setText("Données fournies par :")
+        self.layout.addWidget(credit_label)
 
         pixmap = QPixmap()
         pixmap.loadFromData(requests.get(__wfs_logo__).content)
@@ -121,34 +125,46 @@ class BdTopoExtractorDialog(QDialog):
         icon = QIcon()
         icon.addPixmap(pixmap)
         self.producer_label.setIcon(icon)
-        # self.producer_label.setScaledContents(True)
         self.producer_label.setIconSize(QSize(60, 60))
-        self.layout.addWidget(self.producer_label, layout_row_count, 0, 3, 3)
+        self.source_doc_layout.addWidget(self.producer_label, 0, 0, 3, 3)
 
-        self.documentation_label = QToolButton(self)
+        widget = QWidget()
+        self.doc_layout = QVBoxLayout()
+        self.documentation_label = QPushButton(self)
         self.documentation_label.setObjectName(__uri_homepage__)
         self.documentation_label.setText("Documentation")
-        self.layout.addWidget(self.documentation_label, layout_row_count, 3, 1, 2)
+        self.doc_layout.addWidget(self.documentation_label)
 
-        self.metadata_label = QToolButton(self)
+        self.doc_layout.addStretch()
+
+        self.metadata_label = QPushButton(self)
         self.metadata_label.setObjectName(__wfs_metadata__)
-        self.metadata_label.setText("Metadata")
-        self.layout.addWidget(self.metadata_label, layout_row_count, 3, 3, 2)
-        layout_row_count = layout_row_count + 3
+        self.metadata_label.setText("Metadonnées")
+        self.doc_layout.addWidget(self.metadata_label)
+        widget.setLayout(self.doc_layout)
+        self.source_doc_layout.addWidget(widget, 0, 2, 1, -1)
+
+        self.layout.addLayout(self.source_doc_layout)
 
         # Draw rectangle tool
+        self.extent_layout = QGridLayout()
+        layout_row_count = 0
         self.draw_rectangle_checkbox = QCheckBox(self)
         self.draw_rectangle_checkbox.setText(
             "Dessiner la zone à extraire sur la carte : "
         )
         self.draw_rectangle_checkbox.setChecked(True)
         extent_check_group.addButton(self.draw_rectangle_checkbox)
-        self.layout.addWidget(self.draw_rectangle_checkbox, layout_row_count, 0, 1, 2)
+        self.extent_layout.addWidget(
+            self.draw_rectangle_checkbox, layout_row_count, 0, 1, 2
+        )
 
         self.draw_rectangle_button = QPushButton(self)
         self.draw_rectangle_button.clicked.connect(self.pointer)
         self.draw_rectangle_button.setText("Dessiner un rectangle")
-        self.layout.addWidget(self.draw_rectangle_button, layout_row_count, 2, 1, 3)
+        self.extent_layout.addWidget(
+            self.draw_rectangle_button, layout_row_count, 2, 1, 3
+        )
         layout_row_count = layout_row_count + 1
 
         # Select layer tool
@@ -158,7 +174,9 @@ class BdTopoExtractorDialog(QDialog):
         )
         self.select_layer_checkbox.setChecked(False)
         extent_check_group.addButton(self.select_layer_checkbox)
-        self.layout.addWidget(self.select_layer_checkbox, layout_row_count, 0, 2, 2)
+        self.extent_layout.addWidget(
+            self.select_layer_checkbox, layout_row_count, 0, 2, 2
+        )
 
         self.select_layer_combo_box = QgsMapLayerComboBox(self)
         self.select_layer_combo_box.setFilters(
@@ -167,7 +185,9 @@ class BdTopoExtractorDialog(QDialog):
             | QgsMapLayerProxyModel.RasterLayer
         )
         self.select_layer_combo_box.setEnabled(False)
-        self.layout.addWidget(self.select_layer_combo_box, layout_row_count, 2, 1, 3)
+        self.extent_layout.addWidget(
+            self.select_layer_combo_box, layout_row_count, 2, 1, 3
+        )
         layout_row_count = layout_row_count + 2
 
         # Show WFS max data extent
@@ -176,80 +196,83 @@ class BdTopoExtractorDialog(QDialog):
             "Dessiner la zone à extraire sur la carte"
         )
         self.show_wfs_extent_checkbox.setChecked(False)
-        self.layout.addWidget(self.show_wfs_extent_checkbox, layout_row_count, 0, 1, 2)
-        layout_row_count = layout_row_count + 1
+        self.extent_layout.addWidget(
+            self.show_wfs_extent_checkbox, layout_row_count, 0, 1, 2
+        )
+        self.layout.addLayout(self.extent_layout)
 
         # Select data to extract from WFS
+
         select_data_to_extract_label = QLabel(self)
         select_data_to_extract_label.setText(
             "Données à extraire de la {0}".format(__wfs_name__)
         )
-        self.layout.addWidget(select_data_to_extract_label, layout_row_count, 0)
-        layout_row_count = layout_row_count + 1
+        self.layout.addWidget(select_data_to_extract_label)
 
         self.select_all_checkbox = QCheckBox(self)
         self.select_all_checkbox.setText(
             "Extraire toutes les données de la {0}".format(__wfs_name__)
         )
-        self.layout.addWidget(self.select_all_checkbox, layout_row_count, 0)
-        layout_row_count = layout_row_count + 1
+        self.layout.addWidget(self.select_all_checkbox)
 
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.scroll_area.setMinimumHeight(75)
+        self.scroll_area.setWidgetResizable(True)
+        # self.scroll_area.setMinimumWidth(460)
 
         self.scroll_area_content = QWidget()
-        self.scroll_area_content.setGeometry(0, 0, 600, 920)
-        self.scroll_area.setWidget(self.scroll_area_content)
-        self.layout.addWidget(self.scroll_area, layout_row_count, 0, 1, -1)
         self.layer_check_group = QButtonGroup(self)
         self.layer_check_group.setExclusive(False)
         self.schema = self.getcapabilities.service_schema
         self.add_layers(self.getcapabilities.service_layers)
-        layout_row_count = layout_row_count + 1
+        self.scroll_area.setWidget(self.scroll_area_content)
+        self.layout.addWidget(self.scroll_area)
 
         # Geom predicat
+        self.geom_layout = QGridLayout()
         self.geom_button_group = QButtonGroup(self)
         self.geom_button_group.setExclusive(True)
         self.intersect_checkbox = QCheckBox(self)
         self.intersect_checkbox.setAccessibleName("intersect")
         self.intersect_checkbox.setChecked(True)
         self.intersect_checkbox.setText("Conserver les données intersectant l'emprise")
-        self.layout.addWidget(self.intersect_checkbox, layout_row_count, 0, 1, 2)
+        self.geom_layout.addWidget(self.intersect_checkbox, 0, 0)
         self.geom_button_group.addButton(self.intersect_checkbox)
         self.within_checkbox = QCheckBox(self)
         self.within_checkbox.setAccessibleName("within")
         self.within_checkbox.setText("Découper les données")
-        self.layout.addWidget(self.within_checkbox, layout_row_count, 2, 1, 3)
+        self.geom_layout.addWidget(self.within_checkbox, 0, 1)
         self.geom_button_group.addButton(self.within_checkbox)
-        layout_row_count = layout_row_count + 1
 
         # Crs Selection
         select_crs_label = QLabel(self)
         select_crs_label.setText("Sélectionner une projection pour les exports :")
-        self.layout.addWidget(select_crs_label, layout_row_count, 0)
+        self.geom_layout.addWidget(select_crs_label, 1, 0)
         self.crs_selector = QgsProjectionSelectionWidget(self)
         self.crs_selector.setCrs(self.project.crs())
-        self.layout.addWidget(self.crs_selector, layout_row_count, 2, 1, 3)
+        self.geom_layout.addWidget(self.crs_selector, 1, 1)
+        self.layout.addLayout(self.geom_layout)
         layout_row_count = layout_row_count + 1
 
         # Add result to project
+        self.result_layout = QVBoxLayout()
         self.add_to_project_checkbox = QCheckBox(self)
         self.add_to_project_checkbox.setText(
             "Ajouter les données exportées au projet actuel"
         )
         self.add_to_project_checkbox.setChecked(True)
         self.add_to_project_checkbox.setEnabled(False)
-        self.layout.addWidget(self.add_to_project_checkbox, layout_row_count, 0)
-        layout_row_count = layout_row_count + 1
+        self.result_layout.addWidget(self.add_to_project_checkbox)
 
         # Output folder selection
         self.save_result_checkbox = QCheckBox(self)
         self.save_result_checkbox.setText("Sauvergarder les résultats :")
-        self.layout.addWidget(self.save_result_checkbox, layout_row_count, 0)
-        layout_row_count = layout_row_count + 1
+        self.result_layout.addWidget(self.save_result_checkbox)
 
         # Output format
+        self.format_layout = QHBoxLayout()
         self.output_format_button_group = QButtonGroup(self)
         self.output_format_button_group.setExclusive(True)
         self.gpkg_checkbox = QCheckBox(self)
@@ -257,59 +280,60 @@ class BdTopoExtractorDialog(QDialog):
         self.gpkg_checkbox.setChecked(True)
         self.gpkg_checkbox.setEnabled(False)
         self.gpkg_checkbox.setText("GeoPackage")
-        self.layout.addWidget(self.gpkg_checkbox, layout_row_count, 0, 1, 2)
+        self.format_layout.addWidget(self.gpkg_checkbox)
         self.output_format_button_group.addButton(self.gpkg_checkbox, 0)
         self.shp_checkbox = QCheckBox(self)
         self.shp_checkbox.setAccessibleName("shp")
         self.shp_checkbox.setEnabled(False)
         self.shp_checkbox.setText("Shapefile")
-        self.layout.addWidget(self.shp_checkbox, layout_row_count, 1, 1, 3)
+        self.format_layout.addWidget(self.shp_checkbox)
         self.output_format_button_group.addButton(self.shp_checkbox, 1)
         self.geojson_checkbox = QCheckBox(self)
         self.geojson_checkbox.setAccessibleName("geojson")
         self.geojson_checkbox.setEnabled(False)
         self.geojson_checkbox.setText("GeoJSON")
-        self.layout.addWidget(self.geojson_checkbox, layout_row_count, 3, 1, 3)
+        self.format_layout.addWidget(self.geojson_checkbox)
         self.output_format_button_group.addButton(self.geojson_checkbox, 2)
-        layout_row_count = layout_row_count + 1
+        self.result_layout.addLayout(self.format_layout)
 
+        self.output_layout = QGridLayout()
         label_output = QLabel(self)
         label_output.setText("Parcourir les dossiers :")
-        self.layout.addWidget(label_output, layout_row_count, 0)
+        self.output_layout.addWidget(label_output, 0, 0)
         self.line_edit_output_folder = QLineEdit(self)
         self.line_edit_output_folder.setEnabled(False)
-        self.layout.addWidget(self.line_edit_output_folder, layout_row_count, 1, 1, 3)
+        self.output_layout.addWidget(self.line_edit_output_folder, 0, 1)
         button_output_folder = QPushButton(self)
         button_output_folder.setEnabled(False)
         button_output_folder.setText("...")
         button_output_folder.clicked.connect(self.select_output_folder)
-        self.layout.addWidget(button_output_folder, layout_row_count, 4)
-        layout_row_count = layout_row_count + 1
+        button_output_folder.setMaximumWidth(30)
+        self.output_layout.addWidget(button_output_folder, 0, 2)
+        self.result_layout.addLayout(self.output_layout)
+        self.layout.addLayout(self.result_layout)
 
         # Accept and reject button box
         self.button_box = QDialogButtonBox(self)
         self.button_box.setEnabled(False)
         self.button_box.addButton("Ok", QDialogButtonBox.AcceptRole)
         self.button_box.addButton("Cancel", QDialogButtonBox.RejectRole)
-        self.layout.addWidget(self.button_box, layout_row_count, 2, 2, 3)
+        self.layout.addWidget(self.button_box)
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
         self.accepted.connect(self.get_result)
         self.rejected.connect(self.disconnect)
         self.rectangle_tool.signal.connect(self.activate_window)
-        layout_row_count = layout_row_count + 2
 
         # Progress Bar
         self.select_progress_bar_label = QLabel(self)
         self.select_progress_bar_label.setText("")
-        self.layout.addWidget(self.select_progress_bar_label, layout_row_count, 0)
-        layout_row_count = layout_row_count + 1
+        self.layout.addWidget(self.select_progress_bar_label)
 
         self.progress_bar = QProgressBar(self)
         self.progress_bar.setValue(0)
         self.thread = Thread()
         self.thread._signal.connect(self.signal_accept)
-        self.layout.addWidget(self.progress_bar, layout_row_count, 0, 1, -1)
+        self.layout.addWidget(self.progress_bar)
 
         # Add layout
         self.setLayout(self.layout)
@@ -478,7 +502,7 @@ class BdTopoExtractorDialog(QDialog):
             else:
                 row = row + 1
                 column = 0
-        return row, column
+        self.scroll_area_content.setLayout(layout)
 
     def check_result(self, value):
         if value == 0:

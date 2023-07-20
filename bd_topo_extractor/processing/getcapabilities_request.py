@@ -14,9 +14,7 @@ class GetCapabilitiesRequest:
 
     def list_layers(self):
         file = requests.get(
-            "{url}?service=wfs&version=2.0.0&request=GetCapabilities".format(
-                url=self.url
-            )
+            "{url}?service=wfs&request=GetCapabilities".format(url=self.url)
         )
         data = file.text
         name_string = "<Name>(.+?)</Name><Title>"

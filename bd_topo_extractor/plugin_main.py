@@ -249,10 +249,10 @@ class BdTopoExtractorPlugin:
         # Creation of the folder name
         today = datetime.datetime.now()
         year = today.year
-        month = today.month
-        day = today.day
-        hour = today.hour
-        minute = today.minute
+        month = today.strftime("%m")
+        day = today.strftime("%d")
+        hour = today.strftime("%H")
+        minute = today.strftime("%M")
         folder = (
             "BDTopoExport_"
             + str(year)
