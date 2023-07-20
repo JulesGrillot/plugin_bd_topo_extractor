@@ -200,9 +200,9 @@ class BdTopoExtractorDialog(QDialog):
             self.show_wfs_extent_checkbox, layout_row_count, 0, 1, 2
         )
         self.layout.addLayout(self.extent_layout)
+        self.layout.insertSpacing(100, 25)
 
         # Select data to extract from WFS
-
         select_data_to_extract_label = QLabel(self)
         select_data_to_extract_label.setText(
             "Données à extraire de la {0}".format(__wfs_name__)
@@ -229,6 +229,7 @@ class BdTopoExtractorDialog(QDialog):
         self.add_layers(self.getcapabilities.service_layers)
         self.scroll_area.setWidget(self.scroll_area_content)
         self.layout.addWidget(self.scroll_area)
+        self.layout.insertSpacing(100, 25)
 
         # Geom predicat
         self.geom_layout = QGridLayout()
@@ -254,7 +255,6 @@ class BdTopoExtractorDialog(QDialog):
         self.crs_selector.setCrs(self.project.crs())
         self.geom_layout.addWidget(self.crs_selector, 1, 1)
         self.layout.addLayout(self.geom_layout)
-        layout_row_count = layout_row_count + 1
 
         # Add result to project
         self.result_layout = QVBoxLayout()
@@ -311,6 +311,7 @@ class BdTopoExtractorDialog(QDialog):
         self.output_layout.addWidget(button_output_folder, 0, 2)
         self.result_layout.addLayout(self.output_layout)
         self.layout.addLayout(self.result_layout)
+        self.layout.insertSpacing(100, 25)
 
         # Accept and reject button box
         self.button_box = QDialogButtonBox(self)
