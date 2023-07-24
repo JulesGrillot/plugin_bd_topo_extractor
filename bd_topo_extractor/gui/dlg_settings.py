@@ -91,7 +91,7 @@ class BdTopoExtractorDialog(QDialog):
         url: The wfs url
         """
         super(BdTopoExtractorDialog, self).__init__()
-        self.setObjectName("{}".format(__title__))
+        self.setObjectName("{} Extractor".format(__wfs_name__))
 
         self.iface = iface
         self.project = project
@@ -105,7 +105,7 @@ class BdTopoExtractorDialog(QDialog):
         self.rectangle = None
         self.checked = 0
 
-        self.setWindowTitle(__title__)
+        self.setWindowTitle("{} Extractor".format(__wfs_name__))
 
         self.layout = QVBoxLayout()
         extent_check_group = QButtonGroup(self)
@@ -115,7 +115,7 @@ class BdTopoExtractorDialog(QDialog):
         # Source and credit
         self.source_doc_layout = QGridLayout()
         credit_label = QLabel(self)
-        credit_label.setText("Données fournies par :")
+        credit_label.setText(self.tr("Data provided by :"))
         self.layout.addWidget(credit_label)
 
         pixmap = QPixmap()
@@ -132,14 +132,14 @@ class BdTopoExtractorDialog(QDialog):
         self.doc_layout = QVBoxLayout()
         self.documentation_label = QPushButton(self)
         self.documentation_label.setObjectName(__uri_homepage__)
-        self.documentation_label.setText("Documentation")
+        self.documentation_label.setText(self.tr("Documentation"))
         self.doc_layout.addWidget(self.documentation_label)
 
         self.doc_layout.addStretch()
 
         self.metadata_label = QPushButton(self)
         self.metadata_label.setObjectName(__wfs_metadata__)
-        self.metadata_label.setText("Metadonnées")
+        self.metadata_label.setText(self.tr("Metadata"))
         self.doc_layout.addWidget(self.metadata_label)
         widget.setLayout(self.doc_layout)
         self.source_doc_layout.addWidget(widget, 0, 2, 1, -1)
@@ -151,7 +151,7 @@ class BdTopoExtractorDialog(QDialog):
         layout_row_count = 0
         self.draw_rectangle_checkbox = QCheckBox(self)
         self.draw_rectangle_checkbox.setText(
-            "Dessiner la zone à extraire sur la carte : "
+            self.tr("Draw an extent to extract data :")
         )
         self.draw_rectangle_checkbox.setChecked(True)
         extent_check_group.addButton(self.draw_rectangle_checkbox)
@@ -161,7 +161,7 @@ class BdTopoExtractorDialog(QDialog):
 
         self.draw_rectangle_button = QPushButton(self)
         self.draw_rectangle_button.clicked.connect(self.pointer)
-        self.draw_rectangle_button.setText("Dessiner un rectangle")
+        self.draw_rectangle_button.setText(self.tr("Draw an extent"))
         self.extent_layout.addWidget(
             self.draw_rectangle_button, layout_row_count, 2, 1, 3
         )
@@ -170,7 +170,7 @@ class BdTopoExtractorDialog(QDialog):
         # Select layer tool
         self.select_layer_checkbox = QCheckBox(self)
         self.select_layer_checkbox.setText(
-            "Utiliser l'emprise d'une couche pour l'extraction : "
+            self.tr("Use layer extent to extract data :")
         )
         self.select_layer_checkbox.setChecked(False)
         extent_check_group.addButton(self.select_layer_checkbox)
@@ -192,9 +192,7 @@ class BdTopoExtractorDialog(QDialog):
 
         # Show WFS max data extent
         self.show_wfs_extent_checkbox = QCheckBox(self)
-        self.show_wfs_extent_checkbox.setText(
-            "Dessiner la zone à extraire sur la carte"
-        )
+        self.show_wfs_extent_checkbox.setText(self.tr("Draw the extent on the map"))
         self.show_wfs_extent_checkbox.setChecked(False)
         self.extent_layout.addWidget(
             self.show_wfs_extent_checkbox, layout_row_count, 0, 1, 2
@@ -205,13 +203,13 @@ class BdTopoExtractorDialog(QDialog):
         # Select data to extract from WFS
         select_data_to_extract_label = QLabel(self)
         select_data_to_extract_label.setText(
-            "Données à extraire de la {0}".format(__wfs_name__)
+            self.tr("Data extracted from {0}".format(__wfs_name__))
         )
         self.layout.addWidget(select_data_to_extract_label)
 
         self.select_all_checkbox = QCheckBox(self)
         self.select_all_checkbox.setText(
-            "Extraire toutes les données de la {0}".format(__wfs_name__)
+            self.tr("Extract all data from {0}".format(__wfs_name__))
         )
         self.layout.addWidget(self.select_all_checkbox)
 
@@ -238,18 +236,18 @@ class BdTopoExtractorDialog(QDialog):
         self.intersect_checkbox = QCheckBox(self)
         self.intersect_checkbox.setAccessibleName("intersect")
         self.intersect_checkbox.setChecked(True)
-        self.intersect_checkbox.setText("Conserver les données intersectant l'emprise")
+        self.intersect_checkbox.setText(self.tr("Keep data intersecting the extent"))
         self.geom_layout.addWidget(self.intersect_checkbox, 0, 0)
         self.geom_button_group.addButton(self.intersect_checkbox)
         self.within_checkbox = QCheckBox(self)
         self.within_checkbox.setAccessibleName("within")
-        self.within_checkbox.setText("Découper les données")
+        self.within_checkbox.setText(self.tr("Clip data intersecting the extent"))
         self.geom_layout.addWidget(self.within_checkbox, 0, 1)
         self.geom_button_group.addButton(self.within_checkbox)
 
         # Crs Selection
         select_crs_label = QLabel(self)
-        select_crs_label.setText("Sélectionner une projection pour les exports :")
+        select_crs_label.setText(self.tr("Select outputs' coordinate system :"))
         self.geom_layout.addWidget(select_crs_label, 1, 0)
         self.crs_selector = QgsProjectionSelectionWidget(self)
         self.crs_selector.setCrs(self.project.crs())
@@ -260,7 +258,7 @@ class BdTopoExtractorDialog(QDialog):
         self.result_layout = QVBoxLayout()
         self.add_to_project_checkbox = QCheckBox(self)
         self.add_to_project_checkbox.setText(
-            "Ajouter les données exportées au projet actuel"
+            self.tr("Add exported data to the project")
         )
         self.add_to_project_checkbox.setChecked(True)
         self.add_to_project_checkbox.setEnabled(False)
@@ -268,7 +266,7 @@ class BdTopoExtractorDialog(QDialog):
 
         # Output folder selection
         self.save_result_checkbox = QCheckBox(self)
-        self.save_result_checkbox.setText("Sauvergarder les résultats :")
+        self.save_result_checkbox.setText(self.tr("Save the results :"))
         self.result_layout.addWidget(self.save_result_checkbox)
 
         # Output format
@@ -298,7 +296,7 @@ class BdTopoExtractorDialog(QDialog):
 
         self.output_layout = QGridLayout()
         label_output = QLabel(self)
-        label_output.setText("Parcourir les dossiers :")
+        label_output.setText(self.tr("Explore folders :"))
         self.output_layout.addWidget(label_output, 0, 0)
         self.line_edit_output_folder = QLineEdit(self)
         self.line_edit_output_folder.setEnabled(False)
@@ -316,8 +314,8 @@ class BdTopoExtractorDialog(QDialog):
         # Accept and reject button box
         self.button_box = QDialogButtonBox(self)
         self.button_box.setEnabled(False)
-        self.button_box.addButton("Ok", QDialogButtonBox.AcceptRole)
-        self.button_box.addButton("Cancel", QDialogButtonBox.RejectRole)
+        self.button_box.addButton(self.tr("Ok"), QDialogButtonBox.AcceptRole)
+        self.button_box.addButton(self.tr("Cancel"), QDialogButtonBox.RejectRole)
         self.layout.addWidget(self.button_box)
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
@@ -448,7 +446,10 @@ class BdTopoExtractorDialog(QDialog):
     def select_output_folder(self):
         # Function to use the OS explorer and select an output directory
         my_dir = QFileDialog.getExistingDirectory(
-            self, "Select a folder", "", QFileDialog.ShowDirsOnly
+            self,
+            self.tr("Select an output folder"),
+            "",
+            QFileDialog.ShowDirsOnly,
         )
         self.line_edit_output_folder.setText(my_dir)
         self.check_path()
@@ -629,7 +630,7 @@ class ConfigOptionsPage(FORM_CLASS, QgsOptionsPageWidget):
         self.setObjectName("mOptionsPage{}".format(__title__))
 
         # header
-        self.lbl_title.setText(f"{__title__} - Version {__version__}")
+        self.lbl_title.setText(f"{__wfs_name__} Extractor - Version {__version__}")
 
         # customization
         self.btn_help.setIcon(QIcon(QgsApplication.iconPath("mActionHelpContents.svg")))
@@ -720,7 +721,7 @@ class PlgOptionsFactory(QgsOptionsWidgetFactory):
         :return: plugin title from about module
         :rtype: str
         """
-        return __title__
+        return "{} Extractor".format(__wfs_name__)
 
     def helpId(self) -> str:
         """Returns plugin help URL.

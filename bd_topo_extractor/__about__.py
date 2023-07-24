@@ -75,9 +75,7 @@ __summary__: str = "{}\n{}".format(
     __plugin_md__.get("general").get("about"),
 )
 
-__title__: str = "{0} {1}".format(
-    __plugin_md__.get("wfs").get("name"), __plugin_md__.get("general").get("name")
-)
+__title__: str = "{0}".format(__plugin_md__.get("general").get("name"))
 __title_clean__: str = "".join(e for e in __title__ if e.isalnum())
 
 __uri_homepage__: str = __plugin_md__.get("general").get("homepage")
@@ -106,8 +104,7 @@ if __name__ == "__main__":
     plugin_md = plugin_metadata_as_dict()
     assert isinstance(plugin_md, dict)
     assert (
-        "{0} {1}".format(
-            __plugin_md__.get("wfs").get("name"),
+        "{0}".format(
             __plugin_md__.get("general").get("name"),
         )
         == __title__

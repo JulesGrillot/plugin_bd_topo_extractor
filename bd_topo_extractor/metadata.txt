@@ -1,5 +1,5 @@
 [general]
-name=Extractor
+name=BD_TOPO_Extractor
 about=It allows the user to extract elements from IGN's BD TOPO® with an extent or inside a layer as reference.
 category=Vector
 hasProcessingProvider=yes

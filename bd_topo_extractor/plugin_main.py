@@ -19,10 +19,9 @@ from qgis.core import (
     QgsVectorLayer,
 )
 from qgis.gui import QgisInterface
-from qgis.PyQt.QtCore import QCoreApplication, QLocale, QTranslator, QUrl, pyqtSlot
+from qgis.PyQt.QtCore import QCoreApplication, QLocale, QTranslator, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QIcon
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
-from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager, QNetworkReply
 
 # project
 from bd_topo_extractor.__about__ import (
@@ -31,6 +30,7 @@ from bd_topo_extractor.__about__ import (
     __title__,
     __uri_homepage__,
     __wfs_uri__,
+    __wfs_name__,
 )
 from bd_topo_extractor.gui.dlg_settings import PlgOptionsFactory
 
@@ -86,7 +86,7 @@ class BdTopoExtractorPlugin:
         # -- Actions
         self.action_launch = QAction(
             QIcon(str(__icon_path__)),
-            self.tr(__title__),
+            self.tr("{} Extractor".format(__wfs_name__)),
             self.iface.mainWindow(),
         )
         self.iface.addToolBarIcon(self.action_launch)
@@ -113,9 +113,15 @@ class BdTopoExtractorPlugin:
         )
 
         # -- Menu
-        self.iface.addPluginToMenu(__title__, self.action_launch)
-        self.iface.addPluginToMenu(__title__, self.action_settings)
-        self.iface.addPluginToMenu(__title__, self.action_help)
+        self.iface.addPluginToMenu(
+            "{} Extractor".format(__wfs_name__), self.action_launch
+        )
+        self.iface.addPluginToMenu(
+            "{} Extractor".format(__wfs_name__), self.action_settings
+        )
+        self.iface.addPluginToMenu(
+            "{} Extractor".format(__wfs_name__), self.action_help
+        )
 
         # -- Processing
         self.initProcessing()
@@ -126,7 +132,7 @@ class BdTopoExtractorPlugin:
         self.iface.pluginHelpMenu().addSeparator()
         self.action_help_plugin_menu_documentation = QAction(
             QIcon(str(__icon_path__)),
-            f"{__title__} - Documentation",
+            f"{__wfs_name__} Extractor - Documentation",
             self.iface.mainWindow(),
         )
         self.action_help_plugin_menu_documentation.triggered.connect(
@@ -155,10 +161,16 @@ class BdTopoExtractorPlugin:
     def unload(self):
         """Cleans up when plugin is disabled/uninstalled."""
         # -- Clean up menu
-        self.iface.removePluginMenu(__title__, self.action_launch)
+        self.iface.removePluginMenu(
+            "{} Extractor".format(__wfs_name__), self.action_launch
+        )
         self.iface.removeToolBarIcon(self.action_launch)
-        self.iface.removePluginMenu(__title__, self.action_help)
-        self.iface.removePluginMenu(__title__, self.action_settings)
+        self.iface.removePluginMenu(
+            "{} Extractor".format(__wfs_name__), self.action_help
+        )
+        self.iface.removePluginMenu(
+            "{} Extractor".format(__wfs_name__), self.action_settings
+        )
 
         # -- Clean up preferences panel in QGIS settings
         self.iface.unregisterOptionsWidgetFactory(self.options_factory)
@@ -230,7 +242,9 @@ class BdTopoExtractorPlugin:
             else:
                 # If the user does not have an internet connexion, the plugin does not launch.
                 msg = QMessageBox()
-                msg.critical(None, "Info", "You are not connected to the Internet.")
+                msg.critical(
+                    None, "Info", self.tr("You are not connected to the Internet.")
+                )
         # If the plugin is already launched, clicking on the plugin icon will
         # put back the window on top
         else:
@@ -323,7 +337,7 @@ class BdTopoExtractorPlugin:
                 n = n + 1
                 self.dlg.thread.add_one()
                 self.dlg.select_progress_bar_label.setText(
-                    "Données téléchargées : " + str(n) + "/" + str(max)
+                    self.tr("Downloaded data : " + str(n) + "/" + str(max))
                 )
         # If the user wants a saved GPKG
         if (
