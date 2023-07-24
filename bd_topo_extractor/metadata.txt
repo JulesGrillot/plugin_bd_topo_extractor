@@ -5,7 +5,7 @@ category=Vector
 hasProcessingProvider=yes
 description=It allows the user to extract elements from IGN's BD TOPO® with an extent or inside a layer as reference. You cans select wich element you want to extract.
 icon=resources/images/default_icon.png
-tags=vector
+tags=vector, france, bdtopo, ign, export, ign france
 
 # credits and contact
 author=Jules GRILLOT
