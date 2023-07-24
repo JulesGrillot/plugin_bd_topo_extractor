@@ -29,7 +29,7 @@ from qgis.gui import (
 from qgis.PyQt import uic
 from qgis.PyQt.Qt import QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QIcon
-from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QPushButton
+from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QPushButton, QMessageBox
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QSize
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (
@@ -45,8 +45,6 @@ from PyQt5.QtWidgets import (
     QScrollArea,
     QProgressBar,
     QToolButton,
-    QSpacerItem,
-    QSizePolicy,
 )
 
 # project
@@ -358,6 +356,8 @@ class BdTopoExtractorDialog(QDialog):
             self.draw_rectangle_button.setDisabled
         )
 
+        self.select_layer_combo_box.layerChanged.connect(self.check_layer_size)
+
         self.select_layer_checkbox.stateChanged.connect(self.button_box.setEnabled)
         self.select_layer_checkbox.stateChanged.connect(self.erase_rubber_band)
         self.select_layer_checkbox.stateChanged.connect(self.check_rectangle)
@@ -409,7 +409,21 @@ class BdTopoExtractorDialog(QDialog):
             self.project.instance().addMapLayer(self.max_extent_layer)
             self.canvas.refresh()
 
+    def check_layer_size(self):
+        # Check layer size and add a warning message if extent is too large.
+        layer = self.select_layer_combo_box.currentLayer()
+        # Reproject the layer
+        transformed_extent = self.transform_crs(layer.extent(), layer.crs())
+        if transformed_extent.area() > 100000000:
+            msg = QMessageBox()
+            msg.warning(
+                None,
+                self.tr("Warning"),
+                self.tr("Selected layer is very large (degraded performance)"),
+            )
+
     def get_result(self):
+        self.select_layer_combo_box.layerChanged.disconnect(self.check_layer_size)
         # Accepted result from the dialog
         # If the extent is from a drawn rectangle
         if self.draw_rectangle_checkbox.isChecked():
@@ -570,6 +584,7 @@ class BdTopoExtractorDialog(QDialog):
             pass
 
     def disconnect(self):
+        self.select_layer_combo_box.layerChanged.disconnect(self.check_layer_size)
         # Unset the tool to draw a rectangle
         if self.rectangle_tool:
             self.canvas.unsetMapTool(self.rectangle_tool)

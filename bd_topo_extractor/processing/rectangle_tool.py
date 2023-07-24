@@ -1,4 +1,5 @@
 from qgis.gui import QgsMapTool, QgsMapMouseEvent, QgsRubberBand
+from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.core import (
     QgsPointXY,
     QgsWkbTypes,
@@ -123,14 +124,23 @@ class RectangleDrawTool(QgsMapTool):
                 )
                 transformed_extent = drawned_rectangle.boundingBox()
                 # If the drawn rectangle is too big, an error message appear
-                print(transformed_extent.area())
-                print("MESSAGE WARNING")
+                if transformed_extent.area() > 100000000:
+                    msg = QMessageBox()
+                    msg.warning(
+                        None,
+                        self.tr("Warning"),
+                        self.tr("Drawn rectangle is very large (degraded performance)"),
+                    )
+
                 return QgsRectangle(self.start_point, self.end_point)
             else:
                 # If the drawn rectangle is outside of the max extent, an error message appear
-                print(QgsRectangle(self.start_point, self.end_point))
-                print(self.max_extent)
-                print("MESSAGE D'ERREUR")
+                msg = QMessageBox()
+                msg.critical(
+                    None,
+                    self.tr("Error"),
+                    self.tr("Drawn rectangle is outside of the WFS' extent."),
+                )
 
     def transform_geom(self, geom, input_crs, output_crs):
         # Function used to reproject a geometry

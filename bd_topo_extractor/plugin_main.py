@@ -31,6 +31,7 @@ from bd_topo_extractor.__about__ import (
     __uri_homepage__,
     __wfs_uri__,
     __wfs_name__,
+    __uri_tracker__,
 )
 from bd_topo_extractor.gui.dlg_settings import PlgOptionsFactory
 
@@ -243,7 +244,9 @@ class BdTopoExtractorPlugin:
                 # If the user does not have an internet connexion, the plugin does not launch.
                 msg = QMessageBox()
                 msg.critical(
-                    None, "Info", self.tr("You are not connected to the Internet.")
+                    None,
+                    self.tr("Error"),
+                    self.tr("You are not connected to the Internet."),
                 )
         # If the plugin is already launched, clicking on the plugin icon will
         # put back the window on top
@@ -332,7 +335,19 @@ class BdTopoExtractorPlugin:
                         self.project.instance().addMapLayer(request.final_layer, False)
                         group.addLayer(request.final_layer)
                     else:
-                        print("ERROR MESSAGE")
+                        tracker = f"{__uri_tracker__}/new/choose"
+                        text = self.tr(
+                            '<p><a href="{tracker}">Send an  issue with code #001.'.format(
+                                tracker=tracker
+                            )
+                        )
+
+                        msg = QMessageBox()
+                        msg.critical(
+                            None,
+                            self.tr("Error"),
+                            text,
+                        )
                 # Increase the ProgressBar value
                 n = n + 1
                 self.dlg.thread.add_one()
@@ -359,12 +374,16 @@ class BdTopoExtractorPlugin:
                     final_layer = QgsVectorLayer(uri, name, "ogr")
                     self.project.instance().addMapLayer(final_layer, False)
                     group.addLayer(final_layer)
-
-        print(error_list)
-        print(good_list)
-        print("Nb d'erreurs : " + str(len(error_list)))
-        print("Nb de données : " + str(len(good_list)))
-        print("Sur : " + str(n))
+        msg = QMessageBox()
+        msg.information(
+            None,
+            self.tr("Informations"),
+            self.tr(
+                "Error number : {0}\nData number : {1}\nTotal data : {2}".format(
+                    str(len(error_list)), str(len(good_list)), str(n)
+                )
+            ),
+        )
         # Once it's finished, the ProgressBar is set back to 0
         self.dlg.thread.finish()
         self.dlg.select_progress_bar_label.setText("")

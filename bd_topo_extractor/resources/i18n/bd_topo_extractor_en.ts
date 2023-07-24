@@ -4,93 +4,103 @@
 <context>
     <name>BdTopoExtractorDialog</name>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="172"/>
+        <location filename="../../gui/dlg_settings.py" line="170"/>
         <source>Use layer extent to extract data :</source>
-        <translation>Use an extent from a layer to extract data : </translation>
+        <translation>Use layer extent to extract data :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="135"/>
+        <location filename="../../gui/dlg_settings.py" line="133"/>
         <source>Documentation</source>
         <translation>Documentation</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="142"/>
+        <location filename="../../gui/dlg_settings.py" line="140"/>
         <source>Metadata</source>
-        <translation type="unfinished"></translation>
+        <translation>Metadata</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="153"/>
+        <location filename="../../gui/dlg_settings.py" line="151"/>
         <source>Draw an extent to extract data :</source>
-        <translation type="unfinished"></translation>
+        <translation>Draw an extent to extract data :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="195"/>
+        <location filename="../../gui/dlg_settings.py" line="193"/>
         <source>Draw the extent on the map</source>
-        <translation type="unfinished"></translation>
+        <translation>Draw the extent on the map</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="317"/>
+        <location filename="../../gui/dlg_settings.py" line="315"/>
         <source>Ok</source>
-        <translation></translation>
+        <translation>Ok</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="118"/>
+        <location filename="../../gui/dlg_settings.py" line="116"/>
         <source>Data provided by :</source>
-        <translation type="unfinished"></translation>
+        <translation>Data provided by :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="164"/>
+        <location filename="../../gui/dlg_settings.py" line="162"/>
         <source>Draw an extent</source>
-        <translation type="unfinished"></translation>
+        <translation>Draw an extent</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="205"/>
+        <location filename="../../gui/dlg_settings.py" line="203"/>
         <source>Data extracted from {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Data extracted from {0}</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="211"/>
+        <location filename="../../gui/dlg_settings.py" line="209"/>
         <source>Extract all data from {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Extract all data from {0}</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="239"/>
+        <location filename="../../gui/dlg_settings.py" line="237"/>
         <source>Keep data intersecting the extent</source>
-        <translation type="unfinished"></translation>
+        <translation>Keep data intersecting the extent</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="244"/>
+        <location filename="../../gui/dlg_settings.py" line="242"/>
         <source>Clip data intersecting the extent</source>
-        <translation type="unfinished"></translation>
+        <translation>Clip data intersecting the extent</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="250"/>
+        <location filename="../../gui/dlg_settings.py" line="248"/>
         <source>Select outputs&apos; coordinate system :</source>
-        <translation type="unfinished"></translation>
+        <translation>Select outputs' coordinate system :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="260"/>
+        <location filename="../../gui/dlg_settings.py" line="258"/>
         <source>Add exported data to the project</source>
-        <translation type="unfinished"></translation>
+        <translation>Add exported data to the project</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="269"/>
+        <location filename="../../gui/dlg_settings.py" line="267"/>
         <source>Save the results :</source>
-        <translation type="unfinished"></translation>
+        <translation>Save the results :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="299"/>
+        <location filename="../../gui/dlg_settings.py" line="297"/>
         <source>Explore folders :</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="318"/>
+        <location filename="../../gui/dlg_settings.py" line="316"/>
         <source>Cancel</source>
+        <translation>Cancel</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dlg_settings.py" line="461"/>
+        <source>Select an output folder</source>
+        <translation>Select an output folder</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dlg_settings.py" line="419"/>
+        <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="448"/>
-        <source>Select an output folder</source>
+        <location filename="../../gui/dlg_settings.py" line="419"/>
+        <source>Selected layer is very large (degraded performance)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -124,11 +134,56 @@
     <message>
         <location filename="../../plugin_main.py" line="88"/>
         <source>{} Extractor</source>
+        <translation>{} Extractor</translation>
+    </message>
+    <message>
+        <location filename="../../plugin_main.py" line="354"/>
+        <source>Downloaded data : </source>
+        <translation>Downloaded data : </translation>
+    </message>
+    <message>
+        <location filename="../../plugin_main.py" line="346"/>
+        <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="340"/>
-        <source>Downloaded data : </source>
+        <location filename="../../plugin_main.py" line="339"/>
+        <source>&lt;p&gt;&lt;a href=&quot;{tracker}&quot;&gt;Send an  issue with code #001.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugin_main.py" line="378"/>
+        <source>Informations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugin_main.py" line="378"/>
+        <source>Error number : {0}
+Data number : {1}
+Total data : {2}</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>RectangleDrawTool</name>
+    <message>
+        <location filename="../../processing/rectangle_tool.py" line="129"/>
+        <source>Warning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../processing/rectangle_tool.py" line="129"/>
+        <source>Drawn rectangle is very large (degraded performance)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../processing/rectangle_tool.py" line="139"/>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../processing/rectangle_tool.py" line="139"/>
+        <source>Drawn rectangle is outside of the WFS&apos; extent.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
