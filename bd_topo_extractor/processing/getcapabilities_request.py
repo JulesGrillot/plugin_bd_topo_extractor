@@ -4,6 +4,9 @@ from qgis.core import QgsRectangle
 
 
 class GetCapabilitiesRequest:
+    """Get multiples informations from a getcapabilities request.
+    List all layers available, get the maximal extent of all the Wfs' data."""
+
     def __init__(self, url=None):
         self.url = url
         (
@@ -13,6 +16,7 @@ class GetCapabilitiesRequest:
         ) = self.list_layers()
 
     def list_layers(self):
+        # Use regex to find the informations.
         file = requests.get(
             "{url}?service=wfs&request=GetCapabilities".format(url=self.url)
         )

@@ -383,10 +383,12 @@ class BdTopoExtractorDialog(QDialog):
         self.line_edit_output_folder.textEdited.connect(self.check_path)
 
     def open_url(self):
+        # Function to open the url of the buttons
         url = QUrl(self.sender().objectName())
         QDesktopServices.openUrl(url)
 
     def show_max_extent(self, value):
+        # Show a rectangle for the max extent of the wfs' data
         if value == 0:
             self.project.instance().removeMapLayer(self.max_extent_layer)
             self.canvas.refresh()
@@ -410,23 +412,33 @@ class BdTopoExtractorDialog(QDialog):
             self.canvas.refresh()
 
     def get_result(self):
+        # Accepted result from the dialog
+        # If the extent is from a drawn rectangle
         if self.draw_rectangle_checkbox.isChecked():
+            # Remove rectangle from map
             self.erase_rubber_band()
+            # Remove the map tool to draw the rectangle
             self.canvas.unsetMapTool(self.rectangle_tool)
+            # Get the rectangle extent and reproject it
             self.extent = self.transform_crs(
                 self.rectangle_tool.rectangle(),
                 QgsCoordinateReferenceSystem("EPSG:4326"),
             )
+        # If the extent is from a layer
         else:
+            # Get the layer
             self.layer = self.select_layer_combo_box.currentLayer()
+            # Reproject the layer
             self.extent = self.transform_crs(self.layer.extent(), self.layer.crs())
 
     def signal_accept(self, msg):
+        # Update the progress bar when result is pressed
         self.progress_bar.setValue(int(msg))
         if self.progress_bar.value() == 101:
             self.progress_bar.setValue(0)
 
     def output_format(self):
+        # Function to get the requested output format
         format = ""
         for button in self.output_format_button_group.buttons():
             if button.isChecked():
@@ -434,6 +446,7 @@ class BdTopoExtractorDialog(QDialog):
         return format
 
     def select_output_folder(self):
+        # Function to use the OS explorer and select an output directory
         my_dir = QFileDialog.getExistingDirectory(
             self, "Select a folder", "", QFileDialog.ShowDirsOnly
         )
@@ -441,8 +454,12 @@ class BdTopoExtractorDialog(QDialog):
         self.check_path()
 
     def check_path(self):
+        # Check if different conditions are True to enable the OK button.
+        # Check if there is a rectangle
         if self.rectangle:
+            # Check if a wfs data is checked
             if self.checked > 0:
+                # If the result must be saved the output directory must exists.
                 if self.save_result_checkbox.isChecked():
                     if os.path.exists(self.line_edit_output_folder.text()):
                         self.button_box.setEnabled(True)
@@ -454,30 +471,37 @@ class BdTopoExtractorDialog(QDialog):
                 self.button_box.setEnabled(False)
         else:
             self.button_box.setEnabled(False)
+        # If the result is saved as a temporary output, the result is added to the project and is a GPKG
         if not self.save_result_checkbox.isChecked():
             self.add_to_project_checkbox.setChecked(True)
             self.gpkg_checkbox.setChecked(True)
 
     def select_all(self):
+        # Check all Wfs' data checkbox
         if self.select_all_checkbox.isChecked():
             for button in self.layer_check_group.buttons():
                 button.setChecked(True)
+        # Uncheck all Wfs' data checkbox
         else:
             for button in self.layer_check_group.buttons():
                 button.setChecked(False)
 
     def add_layers(self, layer_list):
+        # Add all wfs' data checkboxes to the ui
         row = 0
         column = 0
+        # Every checkbox are added to a grid layout
         layout = QGridLayout(self.scroll_area_content)
         for layer in layer_list:
             checkbox = QCheckBox(self)
+            # Format data names to add apostrophe, replace underscore with space
             text_with_spaces = layer.replace("_", " ")
             for elem in [" d ", " l ", " s "]:
                 if elem in text_with_spaces:
                     text_with_spaces = text_with_spaces.replace(
                         elem, " " + elem[1] + "'"
                     )
+            # If the name is too long, it is splitted in half
             n = len(text_with_spaces.split(" ")) / 2
             first_part = ""
             second_part = ""
@@ -493,11 +517,16 @@ class BdTopoExtractorDialog(QDialog):
                     else:
                         second_part = second_part + " " + word
             text_with_spaces = first_part + "\n" + second_part
+            # Add upper case to the data name
             checkbox.setText(text_with_spaces.capitalize())
+            # Keep the real data name and add it to accessible name of the checkbox
             checkbox.setAccessibleName(self.schema + ":" + str(layer))
+            # Count the number of checked checkboxes
             checkbox.stateChanged.connect(self.check_result)
             self.layer_check_group.addButton(checkbox)
+            # Add to the checkboxes to the layout
             layout.addWidget(checkbox, row, column)
+            # 3 columns max
             if column != 2:
                 column = column + 1
             else:
@@ -506,6 +535,7 @@ class BdTopoExtractorDialog(QDialog):
         self.scroll_area_content.setLayout(layout)
 
     def check_result(self, value):
+        # Count the checked checkboxes to know if the Ok button must be enabled
         if value == 0:
             self.checked = self.checked - 1
         else:
@@ -513,6 +543,7 @@ class BdTopoExtractorDialog(QDialog):
         self.check_path()
 
     def check_rectangle(self):
+        # Check if a rectangle is drawn or a layer is selected
         if self.select_layer_checkbox.isChecked():
             if self.select_layer_combo_box is None:
                 self.rectangle = None
@@ -522,6 +553,7 @@ class BdTopoExtractorDialog(QDialog):
             self.rectangle = None
 
     def transform_crs(self, rectangle, input_crs):
+        # Reproject a rectangle to the project crs
         geom = QgsGeometry().fromRect(rectangle)
         geom.transform(
             QgsCoordinateTransform(input_crs, self.project.crs(), self.project)
@@ -530,22 +562,26 @@ class BdTopoExtractorDialog(QDialog):
         return transformed_extent
 
     def erase_rubber_band(self):
+        # Erase the drawn rectangle
         if self.rectangle_tool.rubber_band:
             self.rectangle_tool.rubber_band.reset()
         else:
             pass
 
     def disconnect(self):
+        # Unset the tool to draw a rectangle
         if self.rectangle_tool:
             self.canvas.unsetMapTool(self.rectangle_tool)
             self.erase_rubber_band()
 
     def pointer(self):
+        # Add the tool to draw a rectangle
         # self.setVisible(False)
         self.iface.mainWindow().activateWindow()
         self.canvas.setMapTool(self.rectangle_tool)
 
     def activate_window(self):
+        # Put the dialog on top once the rectangle is drawn
         self.activateWindow()
         self.rectangle = True
         self.check_path()
@@ -554,6 +590,8 @@ class BdTopoExtractorDialog(QDialog):
 
 
 class Thread(QThread):
+    """Thread used fot the ProgressBar"""
+
     _signal = pyqtSignal(int)
 
     def __init__(self):

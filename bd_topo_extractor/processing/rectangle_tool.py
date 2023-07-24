@@ -63,7 +63,9 @@ class RectangleDrawTool(QgsMapTool):
         self.is_left_button_pressed = False
 
     def showRect(self, startPoint, endPoint):
+        # Reset the last rectangle
         self.rubber_band.reset(QgsWkbTypes.PolygonGeometry)
+        # Only a rectangle can be used
         if startPoint.x() == endPoint.x() or startPoint.y() == endPoint.y():
             return
 
@@ -72,6 +74,7 @@ class RectangleDrawTool(QgsMapTool):
         point3 = QgsPointXY(endPoint.x(), endPoint.y())
         point4 = QgsPointXY(endPoint.x(), startPoint.y())
 
+        # Create the rectangle
         self.rubber_band.addPoint(point1, False)
         self.rubber_band.addPoint(point2, False)
         self.rubber_band.addPoint(point3, False)
@@ -79,6 +82,7 @@ class RectangleDrawTool(QgsMapTool):
         self.rubber_band.show()
 
     def rectangle(self):
+        # Only a rectangle is accepted
         if self.start_point is None or self.end_point is None:
             return None
         elif (
@@ -87,6 +91,7 @@ class RectangleDrawTool(QgsMapTool):
         ):
             return None
         else:
+            # Rectangle reprojection
             if str(self.project.instance().crs().postgisSrid()) != "4326":
                 start_point = self.transform_geom(
                     QgsGeometry().fromPointXY(self.start_point),
@@ -105,6 +110,7 @@ class RectangleDrawTool(QgsMapTool):
                     end_point.asPoint().x(), end_point.asPoint().y()
                 )
 
+            # Rectangle must be in the max extent of the WFS layer
             if self.max_extent.intersects(
                 QgsRectangle(self.start_point, self.end_point)
             ):
@@ -116,15 +122,18 @@ class RectangleDrawTool(QgsMapTool):
                     QgsCoordinateReferenceSystem("EPSG:3857"),
                 )
                 transformed_extent = drawned_rectangle.boundingBox()
+                # If the drawn rectangle is too big, an error message appear
                 print(transformed_extent.area())
                 print("MESSAGE WARNING")
                 return QgsRectangle(self.start_point, self.end_point)
             else:
+                # If the drawn rectangle is outside of the max extent, an error message appear
                 print(QgsRectangle(self.start_point, self.end_point))
                 print(self.max_extent)
                 print("MESSAGE D'ERREUR")
 
     def transform_geom(self, geom, input_crs, output_crs):
+        # Function used to reproject a geometry
         geom.transform(
             QgsCoordinateTransform(
                 input_crs,
@@ -134,8 +143,10 @@ class RectangleDrawTool(QgsMapTool):
         )
         return geom
 
-    def getExtent(self):
-        return self.new_extent
+    # def getExtent(self):
+    #     #
+    #     return self.new_extent
 
     def deactivate(self):
+        # Signal to put the window on top when drawing the rectangle is over.
         pass
