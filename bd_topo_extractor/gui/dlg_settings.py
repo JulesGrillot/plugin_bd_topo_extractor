@@ -182,6 +182,7 @@ class BdTopoExtractorDialog(QDialog):
             | QgsMapLayerProxyModel.LineLayer
             | QgsMapLayerProxyModel.RasterLayer
         )
+        self.select_layer_combo_box.layerChanged.connect(self.check_layer_size)
         self.select_layer_combo_box.setEnabled(False)
         self.extent_layout.addWidget(
             self.select_layer_combo_box, layout_row_count, 2, 1, 3
@@ -356,7 +357,7 @@ class BdTopoExtractorDialog(QDialog):
             self.draw_rectangle_button.setDisabled
         )
 
-        self.select_layer_combo_box.layerChanged.connect(self.check_layer_size)
+        # self.select_layer_combo_box.layerChanged.connect(self.check_layer_size)
 
         self.select_layer_checkbox.stateChanged.connect(self.button_box.setEnabled)
         self.select_layer_checkbox.stateChanged.connect(self.erase_rubber_band)
@@ -423,7 +424,7 @@ class BdTopoExtractorDialog(QDialog):
             )
 
     def get_result(self):
-        self.select_layer_combo_box.layerChanged.disconnect(self.check_layer_size)
+        # self.select_layer_combo_box.layerChanged.disconnect(self.check_layer_size)
         # Accepted result from the dialog
         # If the extent is from a drawn rectangle
         if self.draw_rectangle_checkbox.isChecked():
