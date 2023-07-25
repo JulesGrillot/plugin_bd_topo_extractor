@@ -133,6 +133,8 @@ class WfsRequest:
                 "memory",
             )
             # Add all features to the memory layer
+            attr = wfs_layer.dataProvider().fields().toList()
+            new_layer.dataProvider().addAttributes(attr)
             new_layer.startEditing()
             for feature in wfs_layer.getFeatures():
                 new_layer.dataProvider().addFeatures([feature])
