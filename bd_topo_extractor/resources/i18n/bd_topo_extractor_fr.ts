@@ -4,7 +4,7 @@
 <context>
     <name>BdTopoExtractorDialog</name>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="170"/>
+        <location filename="../../gui/dlg_settings.py" line="171"/>
         <source>Use layer extent to extract data :</source>
         <translation>Utiliser l&apos;emprise d&apos;une couche pour l&apos;extraction :</translation>
     </message>
@@ -29,79 +29,89 @@
         <translation>Dessiner une emprise pour extraire les données :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="193"/>
+        <location filename="../../gui/dlg_settings.py" line="195"/>
         <source>Draw the extent on the map</source>
         <translation>Tracer l&apos;emprise sur la carte</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="315"/>
+        <location filename="../../gui/dlg_settings.py" line="316"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="162"/>
+        <location filename="../../gui/dlg_settings.py" line="163"/>
         <source>Draw an extent</source>
         <translation>Tracer une emprise</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="203"/>
+        <location filename="../../gui/dlg_settings.py" line="205"/>
         <source>Data extracted from {0}</source>
         <translation>Données extraite de {0}</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="209"/>
+        <location filename="../../gui/dlg_settings.py" line="211"/>
         <source>Extract all data from {0}</source>
         <translation>Extraire toutes les données de {0}</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="237"/>
+        <location filename="../../gui/dlg_settings.py" line="238"/>
         <source>Keep data intersecting the extent</source>
         <translation>Conserver les données intersectant l&apos;emprise</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="242"/>
+        <location filename="../../gui/dlg_settings.py" line="243"/>
         <source>Clip data intersecting the extent</source>
         <translation>Découper les données intersectant l&apos;emprise</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="248"/>
+        <location filename="../../gui/dlg_settings.py" line="249"/>
         <source>Select outputs&apos; coordinate system :</source>
         <translation>Sélectionner la projection en sortie :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="258"/>
+        <location filename="../../gui/dlg_settings.py" line="259"/>
         <source>Add exported data to the project</source>
         <translation>Ajouter les données exportées au projet</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="267"/>
+        <location filename="../../gui/dlg_settings.py" line="268"/>
         <source>Save the results :</source>
         <translation>Sauvergarder les résultats :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="297"/>
+        <location filename="../../gui/dlg_settings.py" line="298"/>
         <source>Explore folders :</source>
         <translation>Parcourir les dossiers :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="316"/>
+        <location filename="../../gui/dlg_settings.py" line="317"/>
         <source>Cancel</source>
         <translation>Annuler</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="461"/>
+        <location filename="../../gui/dlg_settings.py" line="481"/>
         <source>Select an output folder</source>
         <translation>Sélectionner un dossier de sortie</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="419"/>
+        <location filename="../../gui/dlg_settings.py" line="430"/>
         <source>Warning</source>
         <translation>Attention</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="419"/>
+        <location filename="../../gui/dlg_settings.py" line="430"/>
         <source>Selected layer is very large (degraded performance)</source>
         <translation>La couche sélectionnée est très grande (performances dégradées)</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dlg_settings.py" line="438"/>
+        <source>Error</source>
+        <translation>Erreur</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dlg_settings.py" line="438"/>
+        <source>Selected layer is outside of the WFS&apos; extent.</source>
+        <translation>La couche sélectionnée est en dehors de l&apos;emprise du WFS.</translation>
     </message>
 </context>
 <context>

@@ -95,10 +95,10 @@ class BdTopoExtractorDialog(QDialog):
         self.project = project
         self.url = url
         self.canvas = self.iface.mapCanvas()
-        self.getcapabilities = GetCapabilitiesRequest(self.url)
-        self.rectangle_tool = RectangleDrawTool(
-            self.project, self.canvas, self.getcapabilities.max_bounding_box
-        )
+        self.getcapabilities = GetCapabilitiesRequest(None, self.url)
+        self.getcapabilities.finished_dl.connect(self.add_layers)
+        self.getcapabilities.finished_dl.connect(self.set_rectangle_tool)
+
         self.layer = None
         self.rectangle = None
         self.checked = 0
@@ -158,6 +158,7 @@ class BdTopoExtractorDialog(QDialog):
         )
 
         self.draw_rectangle_button = QPushButton(self)
+        self.draw_rectangle_button.setEnabled(False)
         self.draw_rectangle_button.clicked.connect(self.pointer)
         self.draw_rectangle_button.setText(self.tr("Draw an extent"))
         self.extent_layout.addWidget(
@@ -223,7 +224,6 @@ class BdTopoExtractorDialog(QDialog):
         self.layer_check_group = QButtonGroup(self)
         self.layer_check_group.setExclusive(False)
         self.schema = self.getcapabilities.service_schema
-        self.add_layers(self.getcapabilities.service_layers)
         self.scroll_area.setWidget(self.scroll_area_content)
         self.layout.addWidget(self.scroll_area)
         self.layout.insertSpacing(100, 25)
@@ -320,7 +320,6 @@ class BdTopoExtractorDialog(QDialog):
         self.button_box.rejected.connect(self.reject)
         self.accepted.connect(self.get_result)
         self.rejected.connect(self.disconnect)
-        self.rectangle_tool.signal.connect(self.activate_window)
 
         # Progress Bar
         self.select_progress_bar_label = QLabel(self)
@@ -362,6 +361,7 @@ class BdTopoExtractorDialog(QDialog):
         self.select_layer_checkbox.stateChanged.connect(self.button_box.setEnabled)
         self.select_layer_checkbox.stateChanged.connect(self.erase_rubber_band)
         self.select_layer_checkbox.stateChanged.connect(self.check_rectangle)
+        self.select_layer_checkbox.stateChanged.connect(self.check_layer_size)
         self.show_wfs_extent_checkbox.stateChanged.connect(self.show_max_extent)
 
         self.select_all_checkbox.stateChanged.connect(self.select_all)
@@ -389,8 +389,9 @@ class BdTopoExtractorDialog(QDialog):
     def show_max_extent(self, value):
         # Show a rectangle for the max extent of the wfs' data
         if value == 0:
-            self.project.instance().removeMapLayer(self.max_extent_layer)
-            self.canvas.refresh()
+            if len(self.project.instance().mapLayersByName("Max extent")) != 0:
+                self.project.instance().removeMapLayer(self.max_extent_layer)
+                self.canvas.refresh()
         else:
             self.max_extent_layer = QgsVectorLayer(
                 "Polygon?crs=epsg:4326", "Max extent", "memory"
@@ -410,18 +411,35 @@ class BdTopoExtractorDialog(QDialog):
             self.project.instance().addMapLayer(self.max_extent_layer)
             self.canvas.refresh()
 
+    def set_rectangle_tool(self):
+        self.rectangle_tool = RectangleDrawTool(
+            self.project, self.canvas, self.getcapabilities.max_bounding_box
+        )
+        self.rectangle_tool.signal.connect(self.activate_window)
+        self.draw_rectangle_button.setEnabled(True)
+
     def check_layer_size(self):
-        # Check layer size and add a warning message if extent is too large.
-        layer = self.select_layer_combo_box.currentLayer()
-        # Reproject the layer
-        transformed_extent = self.transform_crs(layer.extent(), layer.crs())
-        if transformed_extent.area() > 100000000:
-            msg = QMessageBox()
-            msg.warning(
-                None,
-                self.tr("Warning"),
-                self.tr("Selected layer is very large (degraded performance)"),
-            )
+        if self.select_layer_checkbox.isChecked():
+            # Check layer size and add a warning message if extent is too large.
+            layer = self.select_layer_combo_box.currentLayer()
+            # Reproject the layer
+            transformed_extent = self.transform_crs(layer.extent(), layer.crs())
+            if self.getcapabilities.max_bounding_box.intersects(transformed_extent):
+                if transformed_extent.area() > 100000000:
+                    msg = QMessageBox()
+                    msg.warning(
+                        None,
+                        self.tr("Warning"),
+                        self.tr("Selected layer is very large (degraded performance)"),
+                    )
+            else:
+                # If the layer is outside of the max extent, an eror message appear
+                msg = QMessageBox()
+                msg.critical(
+                    None,
+                    self.tr("Error"),
+                    self.tr("Selected layer is outside of the WFS' extent."),
+                )
 
     def get_result(self):
         # self.select_layer_combo_box.layerChanged.disconnect(self.check_layer_size)
@@ -502,13 +520,13 @@ class BdTopoExtractorDialog(QDialog):
             for button in self.layer_check_group.buttons():
                 button.setChecked(False)
 
-    def add_layers(self, layer_list):
+    def add_layers(self):
         # Add all wfs' data checkboxes to the ui
         row = 0
         column = 0
         # Every checkbox are added to a grid layout
         layout = QGridLayout(self.scroll_area_content)
-        for layer in layer_list:
+        for layer in self.getcapabilities.service_layers:
             checkbox = QCheckBox(self)
             # Format data names to add apostrophe, replace underscore with space
             text_with_spaces = layer.replace("_", " ")

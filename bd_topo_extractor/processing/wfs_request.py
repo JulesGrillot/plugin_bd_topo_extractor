@@ -1,4 +1,3 @@
-from urllib import request
 from qgis.core import (
     QgsVectorLayer,
     QgsProject,
@@ -67,17 +66,10 @@ class WfsRequest:
 
         self.final_layer = None
 
-        # self.build_url()
-        # self.request_data()
-        # self.create_layer()
+        self.build_url()
+        self.create_layer()
 
-        # self.build_url_v2()
-        # self.create_layer_v2()
-
-        self.build_url_v2()
-        self.create_layer_v3()
-
-    def build_url_v2(self):
+    def build_url(self):
         """
         Build the data source url to fetch features intersecting the extent
         """
@@ -98,7 +90,7 @@ class WfsRequest:
         )
         self.uri.setSql(sql)
 
-    def create_layer_v3(self):
+    def create_layer(self):
         """
         Create a layer based on the WFS request.
         If needed, the layer will be clipped with the selected extent.
@@ -218,76 +210,3 @@ class WfsRequest:
         else:
             # If the WFS request has no features the data name is added to the no_data list.
             self.no_data.append(self.data)
-
-    def build_url(self):
-        # Wfs url
-        self.url = (
-            "{service_url}?VERSION=2.0.0&TYPENAMES={data}&SRSNAME=EPSG:{crs}&BBOX={ymin},{xmin},{ymax},"
-            "{xmax}&request=GetFeature&outputFormat=json".format(
-                service_url=self.service_url,
-                data=self.data,
-                crs="4326",
-                ymin=str(self.boundingbox.yMinimum()),
-                xmin=str(self.boundingbox.xMinimum()),
-                ymax=str(self.boundingbox.yMaximum()),
-                xmax=str(self.boundingbox.xMaximum()),
-            )
-        )
-
-    def request_data(self):
-        # Request
-        req = request.Request(self.url, method="POST")
-        r = request.urlopen(req)
-        self.content = r.read().decode("utf-8")
-
-    def create_layer(self):
-        # Add Layer
-        layer = QgsVectorLayer(self.content, self.data, "ogr")
-        QgsProject.instance().addMapLayer(layer)
-
-    def create_layer_v2(self):
-        layer = QgsVectorLayer(self.uri.uri(False), self.data, "WFS")
-        QgsProject.instance().addMapLayer(layer)
-        layer.selectAll()
-        if layer.selectedFeatureCount() > 0:
-            if self.path:
-                output = (
-                    self.path
-                    + "/"
-                    + str(self.data.split(self.schema + ":")[1])
-                    + ".shp"
-                )
-            else:
-                output = "memory:" + str(self.data.split(self.schema + ":")[1])
-            if self.geom == "within":
-                clipping_layer = QgsVectorLayer(
-                    "Polygon?crs=epsg:4326", "clipper", "memory"
-                )
-                clipping_layer.startEditing()
-                new_geom = QgsGeometry().fromRect(self.boundingbox)
-                new_feature = QgsFeature(clipping_layer.fields())
-                new_feature.setGeometry(new_geom)
-                clipping_layer.dataProvider().addFeatures([new_feature])
-                clipping_layer.updateExtents()
-                clipping_layer.commitChanges()
-                clipping_layer.triggerRepaint()
-
-                clip_parameters = {
-                    "INPUT": layer,
-                    "OVERLAY": clipping_layer,
-                    "OUTPUT": output,
-                }
-                save_features = processing.run("native:clip", clip_parameters)
-            else:
-                save_features_param = {"INPUT": layer, "OUTPUT": output}
-                save_features = processing.run(
-                    "native:saveselectedfeatures", save_features_param
-                )
-            if self.path:
-                self.iface.addVectorLayer(
-                    save_features["OUTPUT"],
-                    str(self.data.split(self.schema + ":")[0]),
-                    "ogr",
-                )
-            else:
-                QgsProject.instance().addMapLayer(save_features["OUTPUT"])

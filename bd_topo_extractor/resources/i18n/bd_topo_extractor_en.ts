@@ -4,7 +4,7 @@
 <context>
     <name>BdTopoExtractorDialog</name>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="170"/>
+        <location filename="../../gui/dlg_settings.py" line="171"/>
         <source>Use layer extent to extract data :</source>
         <translation>Use layer extent to extract data :</translation>
     </message>
@@ -24,12 +24,12 @@
         <translation>Draw an extent to extract data :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="193"/>
+        <location filename="../../gui/dlg_settings.py" line="195"/>
         <source>Draw the extent on the map</source>
         <translation>Draw the extent on the map</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="315"/>
+        <location filename="../../gui/dlg_settings.py" line="316"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
@@ -39,68 +39,78 @@
         <translation>Data provided by :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="162"/>
+        <location filename="../../gui/dlg_settings.py" line="163"/>
         <source>Draw an extent</source>
         <translation>Draw an extent</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="203"/>
+        <location filename="../../gui/dlg_settings.py" line="205"/>
         <source>Data extracted from {0}</source>
         <translation>Data extracted from {0}</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="209"/>
+        <location filename="../../gui/dlg_settings.py" line="211"/>
         <source>Extract all data from {0}</source>
         <translation>Extract all data from {0}</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="237"/>
+        <location filename="../../gui/dlg_settings.py" line="238"/>
         <source>Keep data intersecting the extent</source>
         <translation>Keep data intersecting the extent</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="242"/>
+        <location filename="../../gui/dlg_settings.py" line="243"/>
         <source>Clip data intersecting the extent</source>
         <translation>Clip data intersecting the extent</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="248"/>
+        <location filename="../../gui/dlg_settings.py" line="249"/>
         <source>Select outputs&apos; coordinate system :</source>
         <translation>Select outputs' coordinate system :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="258"/>
+        <location filename="../../gui/dlg_settings.py" line="259"/>
         <source>Add exported data to the project</source>
         <translation>Add exported data to the project</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="267"/>
+        <location filename="../../gui/dlg_settings.py" line="268"/>
         <source>Save the results :</source>
         <translation>Save the results :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="297"/>
+        <location filename="../../gui/dlg_settings.py" line="298"/>
         <source>Explore folders :</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="316"/>
+        <location filename="../../gui/dlg_settings.py" line="317"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="461"/>
+        <location filename="../../gui/dlg_settings.py" line="481"/>
         <source>Select an output folder</source>
         <translation>Select an output folder</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="419"/>
+        <location filename="../../gui/dlg_settings.py" line="430"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="419"/>
+        <location filename="../../gui/dlg_settings.py" line="430"/>
         <source>Selected layer is very large (degraded performance)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dlg_settings.py" line="438"/>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dlg_settings.py" line="438"/>
+        <source>Selected layer is outside of the WFS&apos; extent.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

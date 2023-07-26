@@ -1,26 +1,51 @@
 import re
-import requests
-from qgis.core import QgsRectangle
+from qgis.core import QgsRectangle, QgsNetworkAccessManager
+from PyQt5.QtNetwork import QNetworkRequest, QNetworkReply
+from PyQt5.QtCore import QUrl, QObject, pyqtSignal
 
 
-class GetCapabilitiesRequest:
+class GetCapabilitiesRequest(QObject):
+    finished_dl = pyqtSignal()
     """Get multiples informations from a getcapabilities request.
     List all layers available, get the maximal extent of all the Wfs' data."""
 
-    def __init__(self, url=None):
+    def __init__(self, parent=None, url=None):
+        super().__init__(parent)
         self.url = url
-        (
-            self.service_layers,
-            self.service_schema,
-            self.max_bounding_box,
-        ) = self.list_layers()
+        self._pending_downloads = 0
+        self.service_layers = []
+        self.service_schema = ""
+        self.max_bounding_box = QgsRectangle()
+        self.network_manager = QgsNetworkAccessManager()
+        self.download()
 
-    def list_layers(self):
+    @property
+    def pending_downloads(self):
+        return self._pending_downloads
+
+    def download(self):
+        url = QUrl("{url}?service=wfs&request=GetCapabilities".format(url=self.url))
+        request = QNetworkRequest(url)
+        self.reply = self.network_manager.get(request)
+        self.reply.finished.connect(self.handle_finished)
+        self._pending_downloads += 1
+
+    def handle_finished(self):
+        self._pending_downloads -= 1
+        if self.reply.error() != QNetworkReply.NoError:
+            print(f"code: {self.reply.error()} message: {self.reply.errorString()}")
+        else:
+            data = self.reply.readAll().data().decode()
+            (
+                self.service_layers,
+                self.service_schema,
+                self.max_bounding_box,
+            ) = self.list_layers(data)
+        if self.pending_downloads == 0:
+            self.finished_dl.emit()
+
+    def list_layers(self, data):
         # Use regex to find the informations.
-        file = requests.get(
-            "{url}?service=wfs&request=GetCapabilities".format(url=self.url)
-        )
-        data = file.text
         name_string = "<Name>(.+?)</Name><Title>"
         extent_1_string = "<ows:LowerCorner>([+-]?\d+(?:\.\d+)?)"
         extent_2_string = "([+-]?\d+(?:\.\d+)?)</ows:LowerCorner>"

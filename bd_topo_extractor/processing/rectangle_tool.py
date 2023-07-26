@@ -136,7 +136,7 @@ class RectangleDrawTool(QgsMapTool):
 
                 return QgsRectangle(self.start_point, self.end_point)
             else:
-                # If the drawn rectangle is outside of the max extent, an eror message appear
+                # If the drawn rectangle is outside of the max extent, an error message appear
                 msg = QMessageBox()
                 msg.critical(
                     None,
