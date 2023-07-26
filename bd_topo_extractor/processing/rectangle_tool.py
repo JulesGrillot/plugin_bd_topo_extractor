@@ -129,12 +129,14 @@ class RectangleDrawTool(QgsMapTool):
                     msg.warning(
                         None,
                         self.tr("Warning"),
-                        self.tr("Drawn rectangle is very large (degraded performance)"),
+                        self.tr(
+                            "Drawn rectangle is very large (degraded performances)"
+                        ),
                     )
 
                 return QgsRectangle(self.start_point, self.end_point)
             else:
-                # If the drawn rectangle is outside of the max extent, an error message appear
+                # If the drawn rectangle is outside of the max extent, an eror message appear
                 msg = QMessageBox()
                 msg.critical(
                     None,
