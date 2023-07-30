@@ -1,9 +1,9 @@
 [general]
-name=BD_TOPO_Extractor
+name =BD TOPO® Extractor
 about=It allows the user to extract elements from IGN's BD TOPO® with an extent or inside a layer as reference.
 category=Vector
 hasProcessingProvider=yes
-description=It allows the user to extract elements from IGN's BD TOPO® with an extent or inside a layer as reference. You cans select wich element you want to extract.
+description=This tool allows you to extract specific data from IGN's BD TOPO®. The extraction is based on either an extent drawned by the user on the map canvas or a layer's extent.
 icon=resources/images/default_icon.png
 tags=vector, france, bdtopo, ign, export, ign france
 
@@ -25,6 +25,7 @@ version=0.1.0
 changelog=
 
 [wfs]
+plugin_name=BD_TOPO_Extractor
 name=BD TOPO®
 uri=https://wxs.ign.fr/topographie/geoportail/wfs
 metadata=https://geoservices.ign.fr/bdtopo
