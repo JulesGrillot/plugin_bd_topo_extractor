@@ -4,7 +4,7 @@
 
 ### Quel est l'intérêt
 
-Cet outil permet d'extraire une, plusieurs ou toutes les données de la BD TOPO® de l'IGN. Cette extraction est réalisée grâce à une emprise dessiner par l'utilisateur sur la carte ou basée sur l'emprise d'une couche.
+Cet outil permet d'extraire une, plusieurs ou toutes les données de la BD TOPO® de l'IGN. Cette extraction est réalisée grâce à une emprise dessinée par l'utilisateur sur la carte ou basée sur l'emprise d'une couche.
 
 ### Comment on l'utilise
 
