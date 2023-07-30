@@ -21,6 +21,7 @@ Only 4 steps are required to use the BD TOPO® Extractor :
 ## Documentation
 
 This is the plugin's User Interface :
+
 ![UI](resources/images/plugin_ui.png)
 
 ### Select an extent
@@ -36,9 +37,11 @@ First you need to check the right checkbox :
 2 error message can appear :
 
 1. The selected layer or the drawned rectangle is outside of the total extent of the WFS data.
+
 ![outside_wfs_error](resources/images/outside_wfs_error.png)
 
 2. The drawned rectangle is too big, the process can take a long time.
+
 ![extent_too_big_error](resources/images/extent_too_big_error.png)
 
 The max extent of the WFS data can be added to the map with the checkbox `"Draw the extent on the map"`.
@@ -66,7 +69,7 @@ If you want to save the extracted data as layers you have to :
 
 If GeoPackage format is selected, only one file is created inside the folder with all layers inside.
 
-The extraction begin when you press the "OK" button.
+The extraction begin when you press the `"OK"` button.
 
 ### Additional tools
 
