@@ -102,6 +102,7 @@ class BdTopoExtractorDialog(QDialog):
         self.layer = None
         self.rectangle = None
         self.checked = 0
+        self.schema = None
 
         self.setWindowTitle("{} Extractor".format(__wfs_name__))
 
@@ -223,7 +224,6 @@ class BdTopoExtractorDialog(QDialog):
         self.scroll_area_content = QWidget()
         self.layer_check_group = QButtonGroup(self)
         self.layer_check_group.setExclusive(False)
-        self.schema = self.getcapabilities.service_schema
         self.scroll_area.setWidget(self.scroll_area_content)
         self.layout.addWidget(self.scroll_area)
         self.layout.insertSpacing(100, 25)
@@ -522,6 +522,7 @@ class BdTopoExtractorDialog(QDialog):
 
     def add_layers(self):
         # Add all wfs' data checkboxes to the ui
+        self.schema = self.getcapabilities.service_schema
         row = 0
         column = 0
         # Every checkbox are added to a grid layout

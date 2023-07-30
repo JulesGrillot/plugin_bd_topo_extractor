@@ -4,34 +4,34 @@
 <context>
     <name>BdTopoExtractorDialog</name>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="171"/>
+        <location filename="../../gui/dlg_settings.py" line="172"/>
         <source>Use layer extent to extract data :</source>
         <translation>Utiliser l&apos;emprise d&apos;une couche pour l&apos;extraction :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="116"/>
+        <location filename="../../gui/dlg_settings.py" line="117"/>
         <source>Data provided by :</source>
         <translation>Données fournies par :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="133"/>
+        <location filename="../../gui/dlg_settings.py" line="134"/>
         <source>Documentation</source>
         <translation>Documentation</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="140"/>
+        <location filename="../../gui/dlg_settings.py" line="141"/>
         <source>Metadata</source>
         <translation>Metadonnées</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="151"/>
+        <location filename="../../gui/dlg_settings.py" line="152"/>
         <source>Draw an extent to extract data :</source>
         <translation>Dessiner une emprise pour extraire les données :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="195"/>
+        <location filename="../../gui/dlg_settings.py" line="196"/>
         <source>Draw the extent on the map</source>
-        <translation>Tracer l&apos;emprise sur la carte</translation>
+        <translation>Tracer l&apos;emprise maximum du WFS sur la carte</translation>
     </message>
     <message>
         <location filename="../../gui/dlg_settings.py" line="316"/>
@@ -39,17 +39,17 @@
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="163"/>
+        <location filename="../../gui/dlg_settings.py" line="164"/>
         <source>Draw an extent</source>
         <translation>Tracer une emprise</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="205"/>
+        <location filename="../../gui/dlg_settings.py" line="206"/>
         <source>Data extracted from {0}</source>
         <translation>Données extraite de {0}</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="211"/>
+        <location filename="../../gui/dlg_settings.py" line="212"/>
         <source>Extract all data from {0}</source>
         <translation>Extraire toutes les données de {0}</translation>
     </message>
@@ -167,19 +167,25 @@
         <translation>Informations</translation>
     </message>
     <message>
+        <location filename="../../plugin_main.py" line="381"/>
+        <source>No data number : </source>
+        <translation>Données absentes : </translation>
+    </message>
+    <message>
         <location filename="../../plugin_main.py" line="378"/>
-        <source>Error number : {0}
-Data number : {1}
-Total data : {2}</source>
-        <translation>Nombre d&apos;erreur : {0}
-Nombre de données : {1}
-Données total : {2}</translation>
+        <source>Data number : </source>
+        <translation>Données récupérées : </translation>
+    </message>
+    <message>
+        <location filename="../../plugin_main.py" line="378"/>
+        <source>Total data : </source>
+        <translation>Données totales : </translation>
     </message>
 </context>
 <context>
     <name>RectangleDrawTool</name>
     <message>
-        <location filename="../../processing/rectangle_tool.py" line="139"/>
+        <location filename="../../processing/rectangle_tool.py" line="141"/>
         <source>Drawn rectangle is outside of the WFS&apos; extent.</source>
         <translation>Le rectangle tracé est en dehors de l&apos;emprise du WFS.</translation>
     </message>
@@ -190,11 +196,11 @@ Données total : {2}</translation>
     </message>
     <message>
         <location filename="../../processing/rectangle_tool.py" line="129"/>
-        <source>Drawn rectangle is very large (degraded performance)</source>
+        <source>Drawn rectangle is very large (degraded performances)</source>
         <translation>Le rectangle tracé est trop grand (performances dégradées)</translation>
     </message>
     <message>
-        <location filename="../../processing/rectangle_tool.py" line="139"/>
+        <location filename="../../processing/rectangle_tool.py" line="141"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>

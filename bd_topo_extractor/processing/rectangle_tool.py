@@ -130,7 +130,7 @@ class RectangleDrawTool(QgsMapTool):
                         None,
                         self.tr("Warning"),
                         self.tr(
-                            "Drawn rectangle is very large (degraded performances)"
+                            "Drawned rectangle is very large (degraded performances)"
                         ),
                     )
 
@@ -141,7 +141,7 @@ class RectangleDrawTool(QgsMapTool):
                 msg.critical(
                     None,
                     self.tr("Error"),
-                    self.tr("Drawn rectangle is outside of the WFS' extent."),
+                    self.tr("Drawned rectangle is outside of the WFS' extent."),
                 )
 
     def transform_geom(self, geom, input_crs, output_crs):

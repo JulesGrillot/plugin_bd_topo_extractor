@@ -4,27 +4,27 @@
 <context>
     <name>BdTopoExtractorDialog</name>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="171"/>
+        <location filename="../../gui/dlg_settings.py" line="172"/>
         <source>Use layer extent to extract data :</source>
         <translation>Use layer extent to extract data :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="133"/>
+        <location filename="../../gui/dlg_settings.py" line="134"/>
         <source>Documentation</source>
         <translation>Documentation</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="140"/>
+        <location filename="../../gui/dlg_settings.py" line="141"/>
         <source>Metadata</source>
         <translation>Metadata</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="151"/>
+        <location filename="../../gui/dlg_settings.py" line="152"/>
         <source>Draw an extent to extract data :</source>
         <translation>Draw an extent to extract data :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="195"/>
+        <location filename="../../gui/dlg_settings.py" line="196"/>
         <source>Draw the extent on the map</source>
         <translation>Draw the extent on the map</translation>
     </message>
@@ -34,22 +34,22 @@
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="116"/>
+        <location filename="../../gui/dlg_settings.py" line="117"/>
         <source>Data provided by :</source>
         <translation>Data provided by :</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="163"/>
+        <location filename="../../gui/dlg_settings.py" line="164"/>
         <source>Draw an extent</source>
         <translation>Draw an extent</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="205"/>
+        <location filename="../../gui/dlg_settings.py" line="206"/>
         <source>Data extracted from {0}</source>
         <translation>Data extracted from {0}</translation>
     </message>
     <message>
-        <location filename="../../gui/dlg_settings.py" line="211"/>
+        <location filename="../../gui/dlg_settings.py" line="212"/>
         <source>Extract all data from {0}</source>
         <translation>Extract all data from {0}</translation>
     </message>
@@ -168,9 +168,12 @@
     </message>
     <message>
         <location filename="../../plugin_main.py" line="378"/>
-        <source>Error number : {0}
-Data number : {1}
-Total data : {2}</source>
+        <source>Data number : </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugin_main.py" line="378"/>
+        <source>Total data : </source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -183,16 +186,16 @@ Total data : {2}</source>
     </message>
     <message>
         <location filename="../../processing/rectangle_tool.py" line="129"/>
-        <source>Drawn rectangle is very large (degraded performance)</source>
+        <source>Drawn rectangle is very large (degraded performances)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../processing/rectangle_tool.py" line="139"/>
+        <location filename="../../processing/rectangle_tool.py" line="141"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../processing/rectangle_tool.py" line="139"/>
+        <location filename="../../processing/rectangle_tool.py" line="141"/>
         <source>Drawn rectangle is outside of the WFS&apos; extent.</source>
         <translation type="unfinished"></translation>
     </message>

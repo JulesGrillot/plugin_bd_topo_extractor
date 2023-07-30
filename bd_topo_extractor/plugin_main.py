@@ -17,6 +17,9 @@ from qgis.core import (
     QgsSettings,
     QgsProject,
     QgsVectorLayer,
+    QgsRectangle,
+    QgsPointXY,
+    QgsCoordinateReferenceSystem,
 )
 from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import QCoreApplication, QLocale, QTranslator, QUrl
@@ -217,6 +220,9 @@ class BdTopoExtractorPlugin:
                 self.dlg.show()
                 # If there is no layers, an OSM layer is added to simplify the rectangle drawing
                 if len(self.project.instance().mapLayers()) == 0:
+                    self.project.instance().setCrs(
+                        QgsCoordinateReferenceSystem("EPSG:3857")
+                    )
                     # Type of WMTS, url and name
                     type = "xyz"
                     url = "http://tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -232,6 +238,16 @@ class BdTopoExtractorPlugin:
                     #     QgsCoordinateReferenceSystem("EPSG:4326"),
                     # )
                     # self.iface.mapCanvas().setExtent(zoomed_extent)
+                    # self.iface.mapCanvas().refresh()
+                    # Zoom on Lyon
+                    # DOESNT WORK
+                    # point_1 = QgsPointXY(
+                    #     531200.1281016946304590, 5733596.1550237648189068
+                    # )
+                    # point_2 = QgsPointXY(
+                    #     545286.9161411557579413, 5749701.4040353251621127
+                    # )
+                    # self.iface.mapCanvas().setExtent(QgsRectangle(point_1, point_2))
                     # self.iface.mapCanvas().refresh()
                 result = self.dlg.exec_()
                 if result:
@@ -334,20 +350,7 @@ class BdTopoExtractorPlugin:
                     ):
                         self.project.instance().addMapLayer(request.final_layer, False)
                         group.addLayer(request.final_layer)
-                    else:
-                        tracker = f"{__uri_tracker__}/new/choose"
-                        text = self.tr(
-                            '<p><a href="{tracker}">Send an  issue with code #001.'.format(
-                                tracker=tracker
-                            )
-                        )
 
-                        msg = QMessageBox()
-                        msg.critical(
-                            None,
-                            self.tr("Error"),
-                            text,
-                        )
                 # Increase the ProgressBar value
                 n = n + 1
                 self.dlg.thread.add_one()
@@ -378,11 +381,14 @@ class BdTopoExtractorPlugin:
         msg.information(
             None,
             self.tr("Informations"),
-            self.tr(
-                "Error number : {0}\nData number : {1}\nTotal data : {2}".format(
-                    str(len(error_list)), str(len(good_list)), str(n)
-                )
-            ),
+            self.tr("No data number : ")
+            + str(len(error_list))
+            + "\n"
+            + self.tr("Data number : ")
+            + str(len(good_list))
+            + "\n"
+            + self.tr("Total data : ")
+            + str(n),
         )
         # Once it's finished, the ProgressBar is set back to 0
         self.dlg.thread.finish()

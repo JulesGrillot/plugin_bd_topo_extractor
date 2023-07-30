@@ -1,4 +1,4 @@
-# BD Topo Extractor - QGIS Plugin
+# BD TOPO® Extractor - QGIS Plugin
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
@@ -92,4 +92,4 @@ The documentation is generated using Sphinx and is automatically generated throu
 
 ## License
 
-Distributed under the terms of the [`None` license](LICENSE).
+Distributed under the terms of the [`GNU General Public License v2.0` license](LICENSE).
