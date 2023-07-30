@@ -45,13 +45,13 @@
     </message>
     <message>
         <location filename="../../gui/dlg_settings.py" line="206"/>
-        <source>Data extracted from {0}</source>
-        <translation>Données extraite de {0}</translation>
+        <source>Data extracted from </source>
+        <translation>Données extraite de </translation>
     </message>
     <message>
         <location filename="../../gui/dlg_settings.py" line="212"/>
-        <source>Extract all data from {0}</source>
-        <translation>Extraire toutes les données de {0}</translation>
+        <source>Extract all data from </source>
+        <translation>Extraire toutes les données de </translation>
     </message>
     <message>
         <location filename="../../gui/dlg_settings.py" line="238"/>
@@ -117,52 +117,47 @@
 <context>
     <name>BdTopoExtractorPlugin</name>
     <message>
-        <location filename="../../plugin_main.py" line="96"/>
+        <location filename="../../plugin_main.py" line="99"/>
         <source>Help</source>
         <translation>Aide</translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="105"/>
+        <location filename="../../plugin_main.py" line="108"/>
         <source>Settings</source>
         <translation>Paramètres</translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="200"/>
+        <location filename="../../plugin_main.py" line="203"/>
         <source>Everything ran OK.</source>
         <translation>Tout c&apos;est bien passé.</translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="206"/>
+        <location filename="../../plugin_main.py" line="209"/>
         <source>Houston, we&apos;ve got a problem: {}</source>
         <translation>Un problème a été rencontré: {}</translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="246"/>
+        <location filename="../../plugin_main.py" line="262"/>
         <source>You are not connected to the Internet.</source>
         <translation>Vous n&apos;êtes pas connecté à internet.</translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="88"/>
+        <location filename="../../plugin_main.py" line="91"/>
         <source>{} Extractor</source>
         <translation>{} Extractor</translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="354"/>
+        <location filename="../../plugin_main.py" line="357"/>
         <source>Downloaded data : </source>
         <translation>Données téléchargées : </translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="346"/>
+        <location filename="../../plugin_main.py" line="262"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="339"/>
-        <source>&lt;p&gt;&lt;a href=&quot;{tracker}&quot;&gt;Send an  issue with code #001.</source>
-        <translation>&lt;p&gt;&lt;a href=&quot;{tracker}&quot;&gt;Envoyer une issue avec le code #001.</translation>
-    </message>
-    <message>
-        <location filename="../../plugin_main.py" line="378"/>
+        <location filename="../../plugin_main.py" line="381"/>
         <source>Informations</source>
         <translation>Informations</translation>
     </message>
@@ -172,12 +167,12 @@
         <translation>Données absentes : </translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="378"/>
+        <location filename="../../plugin_main.py" line="381"/>
         <source>Data number : </source>
         <translation>Données récupérées : </translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="378"/>
+        <location filename="../../plugin_main.py" line="381"/>
         <source>Total data : </source>
         <translation>Données totales : </translation>
     </message>
@@ -186,7 +181,7 @@
     <name>RectangleDrawTool</name>
     <message>
         <location filename="../../processing/rectangle_tool.py" line="141"/>
-        <source>Drawn rectangle is outside of the WFS&apos; extent.</source>
+        <source>Drawned rectangle is outside of the WFS&apos; extent.</source>
         <translation>Le rectangle tracé est en dehors de l&apos;emprise du WFS.</translation>
     </message>
     <message>
@@ -196,7 +191,7 @@
     </message>
     <message>
         <location filename="../../processing/rectangle_tool.py" line="129"/>
-        <source>Drawn rectangle is very large (degraded performances)</source>
+        <source>Drawned rectangle is very large (degraded performances)</source>
         <translation>Le rectangle tracé est trop grand (performances dégradées)</translation>
     </message>
     <message>

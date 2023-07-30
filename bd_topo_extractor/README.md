@@ -1,4 +1,6 @@
-# BD TOPO® Extractor - QGIS Plugin
+# BD TOPO® Extractor
+
+[Documentation en français](https://github.com/JulesGrillot/plugin_bd_topo_extractor/blob/main/bd_topo_extractor/README_fr.md)
 
 ## Description
 
@@ -30,9 +32,9 @@ You can either draw a rectangle on the map (default) or select a layer in your p
 
 First you need to check the right checkbox :
 
-- `"Draw an extent to extract data :"` if you want to use a drawned extent. Then you have to click the `"Draw an extent"` button and create a rectangle on the map.
+- `Draw an extent to extract data :` if you want to use a drawned extent. Then you have to click the `Draw an extent` button and create a rectangle on the map.
 
-- `"Use layer extent to extract data :"` if you want to use a layer's extent. Check it and then use the combobox to select the layer you want to use.
+- `Use layer extent to extract data :` if you want to use a layer's extent. Check it and then use the combobox to select the layer you want to use.
 
 2 error message can appear :
 
@@ -44,16 +46,16 @@ First you need to check the right checkbox :
 
 ![extent_too_big_error](resources/images/extent_too_big_error.png)
 
-The max extent of the WFS data can be added to the map with the checkbox `"Draw the extent on the map"`.
+The max extent of the WFS data can be added to the map with the checkbox `Draw the extent on the map`.
 
 ### Select data to export
 
 All data in the WFS are listed in the middle part of the UI.
-You can either select all of the data with the checkbox `"Extract all data from BD TOPO®"` or select only the wanted data by checking their respectives checkboxes.
+You can either select all of the data with the checkbox `Extract all data from BD TOPO®` or select only the wanted data by checking their respectives checkboxes.
 
 ### Select output geometry
 
-You can extract all features intersecting the extent (default) by checking `"Keep data intersecting the extent"` or choose to clip all features with the extent by checking `"Clip data intersecting the extent"`.
+You can extract all features intersecting the extent (default) by checking `Keep data intersecting the extent` or choose to clip all features with the extent by checking `Clip data intersecting the extent`.
 
 ### Select output format
 
@@ -62,17 +64,18 @@ If you don't want to save the extracted data as layers (default) you only have t
 If you want to save the extracted data as layers you have to :
 
 - select the output crs with the combobox.
-- check the `"Save the results :"` checkbox.
+- check the `Save the results :` checkbox.
 - select if you want to add the exported data to the project (default) or not.
 - select the output format, `GeoPackage` (default), `Shapefile` or `GeoJSon`.
 - select the output folder to save the new layers inside a folder called `BDTopoExport_yyyymmdd_HHMM`.
 
 If GeoPackage format is selected, only one file is created inside the folder with all layers inside.
 
-The extraction begin when you press the `"OK"` button.
+The extraction begin when you press the `OK` button.
 
 ### Additional tools
 
 By clicking the IGN button, you'll be redirected to [`IGN's website`](https://www.ign.fr/).
-By clicking the documentation button, you'll be redirected to this page.
-By clicking the metadata button, you'll be redirected to the [`description of the BD TOPO® by IGN`](https://geoservices.ign.fr/bdtopo).
+By clicking the `Documentation` button, you'll be redirected to this page.
+By clicking the `Metadata` button, you'll be redirected to the [`description of the BD TOPO® by IGN`](https://geoservices.ign.fr/bdtopo).
+An OpenStreeMap basemap is automatically added to the project if there is no layer in it. So the user can draw a rectangle.

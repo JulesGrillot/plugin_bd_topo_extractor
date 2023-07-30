@@ -204,13 +204,13 @@ class BdTopoExtractorDialog(QDialog):
         # Select data to extract from WFS
         select_data_to_extract_label = QLabel(self)
         select_data_to_extract_label.setText(
-            self.tr("Data extracted from {0}".format(__wfs_name__))
+            self.tr("Data extracted from ") + str(__wfs_name__)
         )
         self.layout.addWidget(select_data_to_extract_label)
 
         self.select_all_checkbox = QCheckBox(self)
         self.select_all_checkbox.setText(
-            self.tr("Extract all data from {0}".format(__wfs_name__))
+            self.tr("Extract all data from ") + str(__wfs_name__)
         )
         self.layout.addWidget(self.select_all_checkbox)
 
