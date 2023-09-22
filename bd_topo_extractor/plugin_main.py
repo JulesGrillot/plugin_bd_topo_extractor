@@ -9,7 +9,6 @@ from functools import partial
 from pathlib import Path
 import datetime
 import os.path
-from urllib import request
 
 # PyQGIS
 from qgis.core import (
@@ -25,6 +24,8 @@ from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import QCoreApplication, QLocale, QTranslator, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QIcon
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
+from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
 # project
 from bd_topo_extractor.__about__ import (
@@ -38,7 +39,7 @@ from bd_topo_extractor.__about__ import (
 )
 from bd_topo_extractor.gui.dlg_settings import PlgOptionsFactory
 
-from bd_topo_extractor.gui.dlg_settings import BdTopoExtractorDialog
+from bd_topo_extractor.gui.dlg_main import BdTopoExtractorDialog
 
 from bd_topo_extractor.processing import BdTopoExtractorProvider
 
@@ -65,6 +66,7 @@ class BdTopoExtractorPlugin:
         self.provider = None
         self.pluginIsActive = False
         self.url = __wfs_uri__
+        self.action_launch = None
 
         # translation
         # initialize the locale
@@ -92,10 +94,10 @@ class BdTopoExtractorPlugin:
             QIcon(str(__icon_path__)),
             self.tr("{} Extractor".format(__wfs_name__)),
             self.iface.mainWindow(),
+            checkable=True,
         )
         self.iface.addToolBarIcon(self.action_launch)
         self.action_launch.triggered.connect(lambda: self.run())
-
         self.action_help = QAction(
             QgsApplication.getThemeIcon("mActionHelpContents.svg"),
             self.tr("Help"),
@@ -197,73 +199,58 @@ class BdTopoExtractorPlugin:
     def run(self):
         """Main process.
 
-        :raises Exception: if there is no item in the feed
+        Try to connect to internet, if successfull, the dialog appear.
+        Else an error message appear.
         """
-        try:
-            self.log(
-                message=self.tr("Everything ran OK."),
-                log_level=3,
-                push=False,
-            )
-        except Exception as err:
-            self.log(
-                message=self.tr("Houston, we've got a problem: {}".format(err)),
-                log_level=2,
-                push=True,
-            )
+        self._manager = DownloadManager()
+        self._manager.finished.connect(self.handle_finished)
+        self._manager.ping("https://github.com/")
+
+    def handle_finished(self):
         # Check if plugin is already launched
         if not self.pluginIsActive:
-            if self.check_connexion():
-                self.pluginIsActive = True
-                # Open Dialog
-                self.dlg = BdTopoExtractorDialog(self.project, self.iface, self.url)
-                self.dlg.show()
-                # If there is no layers, an OSM layer is added to simplify the rectangle drawing
-                if len(self.project.instance().mapLayers()) == 0:
-                    self.project.instance().setCrs(
-                        QgsCoordinateReferenceSystem("EPSG:3857")
-                    )
-                    # Type of WMTS, url and name
-                    type = "xyz"
-                    url = "http://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    name = "OpenStreetMap"
-                    uri = "type=" + type + "&url=" + url
-
-                    # Add WMTS to the QgsProject
-                    self.iface.addRasterLayer(uri, name, "wms")
-                    # Zoom on the WFS max extent
-                    # DOESNT WORK
-                    # zoomed_extent = self.dlg.transform_crs(
-                    #     self.dlg.getcapabilities.max_bounding_box,
-                    #     QgsCoordinateReferenceSystem("EPSG:4326"),
-                    # )
-                    # self.iface.mapCanvas().setExtent(zoomed_extent)
-                    # self.iface.mapCanvas().refresh()
-                    # Zoom on Lyon
-                    # DOESNT WORK
-                    # point_1 = QgsPointXY(
-                    #     531200.1281016946304590, 5733596.1550237648189068
-                    # )
-                    # point_2 = QgsPointXY(
-                    #     545286.9161411557579413, 5749701.4040353251621127
-                    # )
-                    # self.iface.mapCanvas().setExtent(QgsRectangle(point_1, point_2))
-                    # self.iface.mapCanvas().refresh()
-                result = self.dlg.exec_()
-                if result:
-                    # If dialog is accepted, "OK" is pressed, the process is launch
-                    self.processing()
-                else:
-                    # Else the dialog close and plugin can be launched again
-                    self.pluginIsActive = False
-            else:
-                # If the user does not have an internet connexion, the plugin does not launch.
-                msg = QMessageBox()
-                msg.critical(
-                    None,
-                    self.tr("Error"),
-                    self.tr("You are not connected to the Internet."),
+            self.pluginIsActive = True
+            # Open Dialog
+            self.dlg = BdTopoExtractorDialog(self.project, self.iface, self.url)
+            self.dlg.show()
+            # If there is no layers, an OSM layer is added to simplify the rectangle drawing
+            if len(self.project.instance().mapLayers()) == 0:
+                self.project.instance().setCrs(
+                    QgsCoordinateReferenceSystem("EPSG:3857")
                 )
+                # Type of WMTS, url and name
+                type = "xyz"
+                url = "http://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                name = "OpenStreetMap"
+                uri = "type=" + type + "&url=" + url
+
+                # Add WMTS to the QgsProject
+                self.iface.addRasterLayer(uri, name, "wms")
+                # Zoom on the WFS max extent
+                # DOESNT WORK
+                # zoomed_extent = self.dlg.transform_crs(
+                #     self.dlg.getcapabilities.max_bounding_box,
+                #     QgsCoordinateReferenceSystem("EPSG:4326"),
+                # )
+                # self.iface.mapCanvas().setExtent(zoomed_extent)
+                # self.iface.mapCanvas().refresh()
+                # Zoom on Lyon
+                # DOESNT WORK
+                # point_1 = QgsPointXY(
+                #     531200.1281016946304590, 5733596.1550237648189068
+                # )
+                # point_2 = QgsPointXY(
+                #     545286.9161411557579413, 5749701.4040353251621127
+                # )
+                # self.iface.mapCanvas().setExtent(QgsRectangle(point_1, point_2))
+                # self.iface.mapCanvas().refresh()
+            result = self.dlg.exec_()
+            if result:
+                # If dialog is accepted, "OK" is pressed, the process is launch
+                self.processing()
+            else:
+                # Else the dialog close and plugin can be launched again
+                self.pluginIsActive = False
         # If the plugin is already launched, clicking on the plugin icon will
         # put back the window on top
         else:
@@ -357,7 +344,7 @@ class BdTopoExtractorPlugin:
                 self.dlg.select_progress_bar_label.setText(
                     self.tr("Downloaded data : " + str(n) + "/" + str(max))
                 )
-        # If the user wants a saved GPKG
+        # If the user wants to saved as GPKG
         if (
             self.dlg.output_format() == "gpkg"
             and self.dlg.save_result_checkbox.isChecked()
@@ -397,10 +384,41 @@ class BdTopoExtractorPlugin:
         self.dlg.close()
         self.pluginIsActive = False
 
-    def check_connexion(self):
-        """A network connexion is required to use the plugin"""
-        try:
-            request.urlopen("https://github.com/", timeout=1)
-            return True
-        except request.URLError as err:
-            return False
+
+class DownloadManager(QObject):
+    """Constructor.
+
+    Class wich is going to ping a website to know if the user is connected to internet.
+    """
+
+    finished = pyqtSignal()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._manager = QNetworkAccessManager()
+        self.manager.finished.connect(self.handle_finished)
+
+    @property
+    def manager(self):
+        return self._manager
+
+    @property
+    def pending_ping(self):
+        return self._pending_ping
+
+    def ping(self, url):
+        qrequest = QNetworkRequest(QUrl(url))
+        self.manager.get(qrequest)
+
+    def handle_finished(self, reply):
+        print(reply.error())
+        if reply.error() != QNetworkReply.NoError:
+            # If the user does not have an internet connexion, the plugin does not launch.
+            msg = QMessageBox()
+            msg.critical(
+                None,
+                self.tr("Error"),
+                self.tr("You are not connected to the Internet."),
+            )
+        else:
+            self.finished.emit()

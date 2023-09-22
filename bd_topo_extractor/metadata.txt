@@ -21,7 +21,7 @@ qgisMinimumVersion=3.10
 qgisMaximumVersion=3.99
 
 # versioning
-version=0.1.0
+version=0.2.0
 changelog=
 
 [wfs]
@@ -30,4 +30,4 @@ name=BD TOPO®
 uri=https://wxs.ign.fr/topographie/geoportail/wfs
 metadata=https://geoservices.ign.fr/bdtopo
 producer=https://www.ign.fr/
-logo=https://www.ign.fr/sites/default/files/styles/thumbnail/public/2020-06/logoIGN_300x200.png
+logo=resources/images/logo.png
