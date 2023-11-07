@@ -10,13 +10,6 @@
 
 ----
 
-```{toctree}
----
-caption: Usage
-maxdepth: 1
----
-Installation <usage/installation>
-```
 
 ```{toctree}
 ---
