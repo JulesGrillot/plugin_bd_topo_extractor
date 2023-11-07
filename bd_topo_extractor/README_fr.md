@@ -74,5 +74,5 @@ L'extraction commence lorsque vous pressez le bouton `OK`.
 
 Un clic sur le logo de l'IGN permet d'ouvir leur [site internet](https://www.ign.fr/).
 Un clic sur le bouton `Documentation` permet d'ouvrir la [page github du plugin](https://github.com/JulesGrillot/plugin_bd_topo_extractor/tree/main/bd_topo_extractor#bd-topo-extractor---qgis-plugin).
-Un clic sur le bouton `Metadonnées` permet d'ouvrir la page de [`description de la BD TOPO® par l'IGN`](https://geoservices.ign.fr/bdtopo).
+Un clic sur le bouton `Metadonnées` permet d'ouvrir la page de [description de la BD TOPO® par l'IGN](https://geoservices.ign.fr/bdtopo).
 Un fond de carte OpenStreetMap est automatiquement ajouté au projet si il est vide lorsque le plugin est lancé. Afin de simplifier le traçage d'une emprise.
