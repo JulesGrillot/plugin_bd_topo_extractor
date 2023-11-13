@@ -226,24 +226,6 @@ class BdTopoExtractorPlugin:
 
                 # Add WMTS to the QgsProject
                 self.iface.addRasterLayer(uri, name, "wms")
-                # Zoom on the WFS max extent
-                # DOESNT WORK
-                # zoomed_extent = self.dlg.transform_crs(
-                #     self.dlg.getcapabilities.max_bounding_box,
-                #     QgsCoordinateReferenceSystem("EPSG:4326"),
-                # )
-                # self.iface.mapCanvas().setExtent(zoomed_extent)
-                # self.iface.mapCanvas().refresh()
-                # Zoom on Lyon
-                # DOESNT WORK
-                # point_1 = QgsPointXY(
-                #     531200.1281016946304590, 5733596.1550237648189068
-                # )
-                # point_2 = QgsPointXY(
-                #     545286.9161411557579413, 5749701.4040353251621127
-                # )
-                # self.iface.mapCanvas().setExtent(QgsRectangle(point_1, point_2))
-                # self.iface.mapCanvas().refresh()
             result = self.dlg.exec_()
             if result:
                 # If dialog is accepted, "OK" is pressed, the process is launch

@@ -93,6 +93,7 @@ __version_info__: tuple = tuple(
 
 __wfs_name__: str = __plugin_md__.get("wfs").get("name")
 __wfs_uri__: str = __plugin_md__.get("wfs").get("uri")
+__wfs_schema__: str = __plugin_md__.get("wfs").get("schema")
 __wfs_metadata__: str = __plugin_md__.get("wfs").get("metadata")
 __wfs_credit__: str = __plugin_md__.get("wfs").get("producer")
 __wfs_logo__: Path = DIR_PLUGIN_ROOT.resolve() / __plugin_md__.get("wfs").get("logo")

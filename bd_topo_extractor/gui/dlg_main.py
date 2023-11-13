@@ -21,11 +21,25 @@ from qgis.gui import (
     QgsMapLayerComboBox,
     QgsProjectionSelectionWidget,
 )
-from qgis.PyQt import uic
 from qgis.PyQt.Qt import QUrl
-from qgis.PyQt.QtGui import QDesktopServices, QIcon
-from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QPushButton, QMessageBox
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QSize
+from qgis.PyQt.QtGui import (
+    QDesktopServices,
+    QIcon,
+)
+from qgis.PyQt.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QPushButton,
+    QMessageBox,
+)
+
+#PyQt
+from PyQt5.QtCore import (
+    Qt,
+    QThread,
+    pyqtSignal,
+    QSize,
+)
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (
     QGridLayout,
@@ -45,12 +59,9 @@ from PyQt5.QtWidgets import (
 # project
 from bd_topo_extractor.__about__ import (
     DIR_PLUGIN_ROOT,
-    __icon_path__,
-    __title__,
     __uri_homepage__,
-    __uri_tracker__,
-    __version__,
     __wfs_name__,
+    __wfs_schema__,
     __wfs_logo__,
     __wfs_metadata__,
     __wfs_credit__,
@@ -80,14 +91,15 @@ class BdTopoExtractorDialog(QDialog):
         self.project = project
         self.url = url
         self.canvas = self.iface.mapCanvas()
-        self.getcapabilities = GetCapabilitiesRequest(None, self.url)
-        self.getcapabilities.finished_dl.connect(self.add_layers)
-        self.getcapabilities.finished_dl.connect(self.set_rectangle_tool)
 
         self.layer = None
         self.rectangle = None
         self.checked = 0
-        self.schema = None
+        self.schema = __wfs_schema__
+
+        self.getcapabilities = GetCapabilitiesRequest(None, self.url, self.schema)
+        self.getcapabilities.finished_dl.connect(self.add_layers)
+        self.getcapabilities.finished_dl.connect(self.set_rectangle_tool)
 
         self.setWindowTitle("{} Extractor".format(__wfs_name__))
 
@@ -507,7 +519,6 @@ class BdTopoExtractorDialog(QDialog):
 
     def add_layers(self):
         # Add all wfs' data checkboxes to the ui
-        self.schema = self.getcapabilities.service_schema
         row = 0
         column = 0
         # Every checkbox are added to a grid layout
@@ -541,7 +552,10 @@ class BdTopoExtractorDialog(QDialog):
             # Add upper case to the data name
             checkbox.setText(text_with_spaces.capitalize())
             # Keep the real data name and add it to accessible name of the checkbox
-            checkbox.setAccessibleName(self.schema + ":" + str(layer))
+            if self.schema == "*":
+                checkbox.setAccessibleName(layer)
+            else:
+                checkbox.setAccessibleName(self.schema + ":" + str(layer))
             # Count the number of checked checkboxes
             checkbox.stateChanged.connect(self.check_result)
             self.layer_check_group.addButton(checkbox)
@@ -630,7 +644,7 @@ class Thread(QThread):
 
     def add_one(self):
         self.value = self.value + 1
-        self._signal.emit((self.value / self.max_value) * 100)
+        self._signal.emit(int((self.value / self.max_value) * 100))
 
     def finish(self):
         self._signal.emit(101)

@@ -21,13 +21,14 @@ qgisMinimumVersion=3.10
 qgisMaximumVersion=3.99
 
 # versioning
-version=0.2.0
+version=0.3.0
 changelog=
 
 [wfs]
 plugin_name=BD_TOPO_Extractor
 name=BD TOPO®
-uri=https://wxs.ign.fr/topographie/geoportail/wfs
+uri=https://data.geopf.fr/wfs/ows
+schema=BDTOPO_V3
 metadata=https://geoservices.ign.fr/bdtopo
 producer=https://www.ign.fr/
 logo=resources/images/logo.png

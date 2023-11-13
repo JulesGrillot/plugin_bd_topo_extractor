@@ -12,9 +12,6 @@ from qgis.core import (
 from qgis.gui import QgisInterface
 import processing
 import os.path
-from bd_topo_extractor.__about__ import (
-    __title__,
-)
 
 
 class WfsRequest:
@@ -81,8 +78,9 @@ class WfsRequest:
         self.uri.setParam("title", self.data)
         self.uri.setParam("table", "")
         self.uri.setParam("srsName", "EPSG:" + str("4326"))
-        sql = "SELECT * FROM \"{data}\" as t1 WHERE ST_Intersects(t1.geometrie, ST_GeometryFromText('Polygon (({xmin} {ymin}, {xmax} {ymin}, {xmax} {ymax}, {xmin} {ymax}, {xmin} {ymin}))', 4326))".format(
+        sql = "SELECT * FROM \"{data}\" as t1 WHERE ST_Intersects(t1.{geometry_column}, ST_GeometryFromText('Polygon (({xmin} {ymin}, {xmax} {ymin}, {xmax} {ymax}, {xmin} {ymax}, {xmin} {ymin}))', 4326))".format(
             data=self.data,
+            geometry_column="geometrie",
             ymin=str(self.boundingbox.yMinimum()),
             xmin=str(self.boundingbox.xMinimum()),
             ymax=str(self.boundingbox.yMaximum()),
@@ -99,18 +97,22 @@ class WfsRequest:
         # Check if the WFS request has any features
         wfs_layer = QgsVectorLayer(self.uri.uri(False), self.data, "WFS")
         if wfs_layer.featureCount() > 0:
+            if self.schema == "*":
+                self.export_name = self.data.replace(":", "_")
+            else:
+                self.export_name = self.data.split(self.schema + ":")[1]
             if self.path:
                 # Creation of the output path used for SHP and GeoJSON.
                 output = (
-                    self.path
-                    + "/"
-                    + str(self.data.split(self.schema + ":")[1])
-                    + "."
-                    + str(self.format)
+                        self.path
+                        + "/"
+                        + str(self.export_name)
+                        + "."
+                        + str(self.format)
                 )
             else:
                 # Output for a memory layer.
-                output = "memory:" + str(self.data.split(self.schema + ":")[1])
+                output = "memory:" + str(self.export_name)
 
             # Check geometry type to create a memory layer to get all features from the WFS request.
             geom_type = QgsWkbTypes.geometryDisplayString(
@@ -121,7 +123,7 @@ class WfsRequest:
             # Create a memory layer
             new_layer = QgsVectorLayer(
                 geom_type + "?crs=epsg:4326",
-                str(self.data.split(self.schema + ":")[1]),
+                str(self.export_name),
                 "memory",
             )
             # Add all features to the memory layer
@@ -153,7 +155,7 @@ class WfsRequest:
                 clip_parameters = {
                     "INPUT": new_layer,
                     "OVERLAY": clipping_layer,
-                    "OUTPUT": "memory:" + str(self.data.split(self.schema + ":")[1]),
+                    "OUTPUT": "memory:" + str(self.export_name),
                 }
                 new_layer = processing.run("native:clip", clip_parameters)["OUTPUT"]
             if self.path:
@@ -168,7 +170,7 @@ class WfsRequest:
                         options.actionOnExistingFile = (
                             QgsVectorFileWriter.CreateOrOverwriteLayer
                         )
-                    options.layerName = str(self.data.split(self.schema + ":")[1])
+                    options.layerName = str(self.export_name)
                     options.fileEncoding = new_layer.dataProvider().encoding()
                     options.driverName = driver
                     QgsVectorFileWriter.writeAsVectorFormatV2(
@@ -193,7 +195,7 @@ class WfsRequest:
                     )
                     self.final_layer = QgsVectorLayer(
                         output,
-                        str(self.data.split(self.schema + ":")[1]),
+                        str(self.export_name),
                         "ogr",
                     )
             else:
@@ -201,8 +203,9 @@ class WfsRequest:
                 reproject_parameter = {
                     "INPUT": new_layer,
                     "TARGET_CRS": self.crs,
-                    "OUTPUT": "memory:" + str(self.data.split(self.schema + ":")[1]),
+                    "OUTPUT": "memory:" + str(self.export_name),
                 }
+
                 self.final_layer = processing.run(
                     "native:reprojectlayer", reproject_parameter
                 )["OUTPUT"]
