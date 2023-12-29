@@ -5,12 +5,7 @@ from PyQt5.QtWidgets import (
 
 # project
 from bd_topo_extractor.__about__ import (
-    DIR_PLUGIN_ROOT,
-    __icon_path__,
     __title__,
-    __uri_homepage__,
-    __uri_tracker__,
-    __version__,
 )
 
 

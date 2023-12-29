@@ -16,8 +16,6 @@ from qgis.core import (
     QgsSettings,
     QgsProject,
     QgsVectorLayer,
-    QgsRectangle,
-    QgsPointXY,
     QgsCoordinateReferenceSystem,
 )
 from qgis.gui import QgisInterface
@@ -25,7 +23,11 @@ from qgis.PyQt.QtCore import QCoreApplication, QLocale, QTranslator, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QIcon
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
 from PyQt5.QtCore import pyqtSignal, QObject
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
+from PyQt5.QtNetwork import (
+    QNetworkAccessManager,
+    QNetworkRequest,
+    QNetworkReply,
+)
 
 # project
 from bd_topo_extractor.__about__ import (
@@ -35,7 +37,6 @@ from bd_topo_extractor.__about__ import (
     __uri_homepage__,
     __wfs_uri__,
     __wfs_name__,
-    __uri_tracker__,
 )
 from bd_topo_extractor.gui.dlg_settings import PlgOptionsFactory
 
@@ -56,8 +57,10 @@ class BdTopoExtractorPlugin:
     def __init__(self, iface: QgisInterface):
         """Constructor.
 
-        :param iface: An interface instance that will be passed to this class which \
-        provides the hook by which you can manipulate the QGIS application at run time.
+        :param iface: An interface instance \
+            that will be passed to this class which \
+        provides the hook by which you can manipulate \
+            the QGIS application at run time.
         :type iface: QgsInterface
         """
         self.iface = iface
@@ -70,13 +73,14 @@ class BdTopoExtractorPlugin:
 
         # translation
         # initialize the locale
-        self.locale: str = QgsSettings().value("locale/userLocale", QLocale().name())[
-            0:2
-        ]
+        self.locale: str = QgsSettings().value(
+            "locale/userLocale", QLocale().name())[0:2]
         locale_path: Path = (
             DIR_PLUGIN_ROOT / f"resources/i18n/{__title__.lower()}_{self.locale}.qm"
         )
-        self.log(message=f"Translation: {self.locale}, {locale_path}", log_level=4)
+        self.log(
+            message=f"Translation: {self.locale}, {locale_path}", log_level=4
+        )
         if locale_path.exists():
             self.translator = QTranslator()
             self.translator.load(str(locale_path.resolve()))
@@ -211,9 +215,11 @@ class BdTopoExtractorPlugin:
         if not self.pluginIsActive:
             self.pluginIsActive = True
             # Open Dialog
-            self.dlg = BdTopoExtractorDialog(self.project, self.iface, self.url)
+            self.dlg = BdTopoExtractorDialog(
+                self.project, self.iface, self.url)
             self.dlg.show()
-            # If there is no layers, an OSM layer is added to simplify the rectangle drawing
+            # If there is no layers, an OSM layer is added
+            # to simplify the rectangle drawing
             if len(self.project.instance().mapLayers()) == 0:
                 self.project.instance().setCrs(
                     QgsCoordinateReferenceSystem("EPSG:3857")
@@ -317,7 +323,8 @@ class BdTopoExtractorPlugin:
                         or self.dlg.output_format() == "gpkg"
                         and not self.dlg.save_result_checkbox.isChecked()
                     ):
-                        self.project.instance().addMapLayer(request.final_layer, False)
+                        self.project.instance().addMapLayer(
+                            request.final_layer, False)
                         group.addLayer(request.final_layer)
 
                 # Increase the ProgressBar value
@@ -370,7 +377,8 @@ class BdTopoExtractorPlugin:
 class DownloadManager(QObject):
     """Constructor.
 
-    Class wich is going to ping a website to know if the user is connected to internet.
+    Class wich is going to ping a website
+    to know if the user is connected to internet.
     """
 
     finished = pyqtSignal()
@@ -395,7 +403,8 @@ class DownloadManager(QObject):
     def handle_finished(self, reply):
         print(reply.error())
         if reply.error() != QNetworkReply.NoError:
-            # If the user does not have an internet connexion, the plugin does not launch.
+            # If the user does not have an internet connexion,
+            # the plugin does not launch.
             msg = QMessageBox()
             msg.critical(
                 None,

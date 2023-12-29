@@ -27,7 +27,8 @@ class BdTopoExtractorProvider(QgsProcessingProvider):
         pass
 
     def id(self) -> str:
-        """Unique provider id, used for identifying it. This string should be unique, \
+        """Unique provider id, used for identifying it. \
+        This string should be unique, \
         short, character only string, eg "qgis" or "gdal". \
         This string should not be localised.
 
@@ -38,7 +39,8 @@ class BdTopoExtractorProvider(QgsProcessingProvider):
 
     def name(self) -> str:
         """Returns the provider name, which is used to describe the provider
-        within the GUI. This string should be short (e.g. "Lastools") and localised.
+        within the GUI. This string should be short
+        (e.g. "Lastools") and localised.
 
         :return: provider name
         :rtype: str
@@ -47,7 +49,8 @@ class BdTopoExtractorProvider(QgsProcessingProvider):
 
     def longName(self) -> str:
         """Longer version of the provider name, which can include
-        extra details such as version numbers. E.g. "Lastools LIDAR tools". This string should be localised. The default
+        extra details such as version numbers. E.g. "Lastools LIDAR tools".
+        This string should be localised. The default
         implementation returns the same string as name().
 
         :return: provider long name
@@ -61,7 +64,8 @@ class BdTopoExtractorProvider(QgsProcessingProvider):
         :return: provider icon
         :rtype: QIcon
         """
-        return QIcon(str(DIR_PLUGIN_ROOT / "resources/images/default_icon.png"))
+        return QIcon(
+            str(DIR_PLUGIN_ROOT / "resources/images/default_icon.png"))
 
     def tr(self, message: str) -> str:
         """Get the translation for a string using Qt translation API.
@@ -76,8 +80,10 @@ class BdTopoExtractorProvider(QgsProcessingProvider):
         return QCoreApplication.translate(self.__class__.__name__, message)
 
     def versionInfo(self) -> str:
-        """Version information for the provider, or an empty string if this is not \
-        applicable (e.g. for inbuilt Processing providers). For plugin based providers, \
+        """Version information for the provider, \
+        or an empty string if this is not \
+        applicable (e.g. for inbuilt Processing providers). \
+        For plugin based providers, \
         this should return the plugin’s version identifier.
 
         :return: version

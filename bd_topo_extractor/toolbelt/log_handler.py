@@ -37,8 +37,10 @@ class PlgLogger(logging.Handler):
         # parent
         parent_location: QWidget = None,
     ):
-        """Send messages to QGIS messages windows and to the user as a message bar. \
-        Plugin name is used as title. If debug mode is disabled, only warnings (1) and \
+        """Send messages to QGIS messages windows \
+        and to the user as a message bar. \
+        Plugin name is used as title. \
+        If debug mode is disabled, only warnings (1) and \
         errors (2) or with push are sent.
 
         :param message: message to display
@@ -46,14 +48,16 @@ class PlgLogger(logging.Handler):
         :param application: name of the application sending the message. \
         Defaults to __about__.__title__
         :type application: str, optional
-        :param log_level: message level. Possible values: 0 (info), 1 (warning), \
+        :param log_level: message level. \
+            Possible values: 0 (info), 1 (warning), \
         2 (critical), 3 (success), 4 (none - grey). Defaults to 0 (info)
         :type log_level: int, optional
-        :param push: also display the message in the QGIS message bar in addition to \
-        the log, defaults to False
+        :param push: also display the message in the QGIS message bar \
+            in addition to the log, defaults to False
         :type push: bool, optional
         :param duration: duration of the message in seconds. If not set, the \
-        duration is calculated from the log level: `(log_level + 1) * 3`. seconds. \
+        duration is calculated from the log level: \
+            `(log_level + 1) * 3`. seconds. \
         If set to 0, then the message must be manually dismissed by the user. \
         Defaults to None.
         :type duration: int, optional
@@ -61,13 +65,16 @@ class PlgLogger(logging.Handler):
         :type button: bool, optional
         :param button_text: text label of the button. Defaults to None.
         :type button_text: str, optional
-        :param button_connect: function to be called when the button is pressed. \
-        If not set, a simple dialog (QgsMessageOutput) is used to dislay the message. \
+        :param button_connect: function to be called \
+            when the button is pressed. \
+        If not set, a simple dialog (QgsMessageOutput) \
+            is used to dislay the message. \
         Defaults to None.
         :type button_connect: Callable, optional
         :param parent_location: parent location widget. \
         If not set, QGIS canvas message bar is used to push message, \
-        otherwise if a QgsMessageBar is available in parent_location it is used instead. \
+        otherwise if a QgsMessageBar is available \
+            in parent_location it is used instead. \
         Defaults to None.
         :type parent_location: Widget, optional
 
@@ -76,8 +83,10 @@ class PlgLogger(logging.Handler):
         .. code-block:: python
 
             log(message="Plugin loaded - INFO", log_level=0, push=False)
-            log(message="Plugin loaded - WARNING", log_level=1, push=1, duration=5)
-            log(message="Plugin loaded - ERROR", log_level=2, push=1, duration=0)
+            log(message="Plugin loaded - WARNING", \
+                log_level=1, push=1, duration=5)
+            log(message="Plugin loaded - ERROR", \
+                log_level=2, push=1, duration=0)
             log(
                 message="Plugin loaded - SUCCESS",
                 log_level=3,
@@ -108,7 +117,7 @@ class PlgLogger(logging.Handler):
             message=message, tag=application, notifyUser=push, level=log_level
         )
 
-        # optionally, display message on QGIS Message bar (above the map canvas)
+        # optionally, display message on QGIS Message bar (above the canvas)
         if push:
             msg_bar = None
 
@@ -136,7 +145,8 @@ class PlgLogger(logging.Handler):
                     mini_dlg = QgsMessageOutput.createMessageOutput()
                     mini_dlg.setTitle(application)
                     mini_dlg.setMessage(message, QgsMessageOutput.MessageText)
-                    widget_button.clicked.connect(partial(mini_dlg.showMessage, False))
+                    widget_button.clicked.connect(
+                        partial(mini_dlg.showMessage, False))
 
                 notification.layout().addWidget(widget_button)
                 msg_bar.pushWidget(

@@ -27,6 +27,7 @@ class PlgSettingsStructure:
     debug_mode: bool = False
     version: str = __version__
 
+
 class PlgOptionsManager:
     @staticmethod
     def get_plg_settings() -> PlgSettingsStructure:
@@ -77,7 +78,8 @@ class PlgOptionsManager:
         settings.beginGroup(__title__)
 
         try:
-            out_value = settings.value(key=key, defaultValue=default, type=exp_type)
+            out_value = settings.value(
+                key=key, defaultValue=default, type=exp_type)
         except Exception as err:
             log_hdlr.PlgLogger.log(
                 message="Error occurred trying to get settings: {}.Trace: {}".format(

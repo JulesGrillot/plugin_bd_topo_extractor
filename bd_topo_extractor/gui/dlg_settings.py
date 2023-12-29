@@ -29,9 +29,6 @@ from bd_topo_extractor.__about__ import (
     __uri_tracker__,
     __version__,
     __wfs_name__,
-    __wfs_logo__,
-    __wfs_metadata__,
-    __wfs_credit__,
 )
 from bd_topo_extractor.toolbelt import PlgLogger, PlgOptionsManager
 from bd_topo_extractor.toolbelt.preferences import PlgSettingsStructure
@@ -64,30 +61,37 @@ class ConfigOptionsPage(FORM_CLASS, QgsOptionsPageWidget):
         self.setObjectName("mOptionsPage{}".format(__title__))
 
         # header
-        self.lbl_title.setText(f"{__wfs_name__} Extractor - Version {__version__}")
+        self.lbl_title.setText(
+            f"{__wfs_name__} Extractor - Version {__version__}")
 
         # customization
-        self.btn_help.setIcon(QIcon(QgsApplication.iconPath("mActionHelpContents.svg")))
+        self.btn_help.setIcon(
+            QIcon(QgsApplication.iconPath("mActionHelpContents.svg")))
         self.btn_help.pressed.connect(
             partial(QDesktopServices.openUrl, QUrl(__uri_homepage__))
         )
 
         self.btn_report.setIcon(
-            QIcon(QgsApplication.iconPath("console/iconSyntaxErrorConsole.svg"))
+            QIcon(QgsApplication.iconPath(
+                "console/iconSyntaxErrorConsole.svg"))
         )
         self.btn_report.pressed.connect(
-            partial(QDesktopServices.openUrl, QUrl(f"{__uri_tracker__}/new/choose"))
+            partial(
+                QDesktopServices.openUrl, QUrl(
+                    f"{__uri_tracker__}/new/choose"))
         )
 
-        self.btn_reset.setIcon(QIcon(QgsApplication.iconPath("mActionUndo.svg")))
+        self.btn_reset.setIcon(
+            QIcon(QgsApplication.iconPath("mActionUndo.svg")))
         self.btn_reset.pressed.connect(self.reset_settings)
 
         # load previously saved settings
         self.load_settings()
 
     def apply(self):
-        """Called to permanently apply the settings shown in the options page (e.g. \
-        save them to QgsSettings objects). This is usually called when the options \
+        """Called to permanently apply the settings shown \
+        in the options page (e.g. save them to QgsSettings \
+        objects). This is usually called when the options \
         dialog is accepted."""
         settings = self.plg_settings.get_plg_settings()
 
@@ -150,7 +154,8 @@ class PlgOptionsFactory(QgsOptionsWidgetFactory):
         return ConfigOptionsPage(parent)
 
     def title(self) -> str:
-        """Returns plugin title, used to name the tab in QGIS options tab widget.
+        """Returns plugin title, used to name the tab \
+        in QGIS options tab widget.
 
         :return: plugin title from about module
         :rtype: str

@@ -34,11 +34,13 @@ class WfsRequest:
         :param 
         project: The current QGIS project instance
         iface: An interface instance that will be passed to this class which \
-        provides the hook by which you can manipulate the QGIS application at run time.
+        provides the hook by which you can manipulate \
+        the QGIS application at run time.
         url: The wfs url
         data: The layer to extract from the wfs service
         crs: The coordinate reference system for the output layer
-        boundingbox: The bounding box used to filter the data from the wfs service
+        boundingbox: The bounding box used to filter \
+        the data from the wfs service
         path: Ouput path to save layers
         schema: Name of the data's schema
         geom: Check if the data needs to be clipped by the extent
@@ -114,7 +116,8 @@ class WfsRequest:
                 # Output for a memory layer.
                 output = "memory:" + str(self.export_name)
 
-            # Check geometry type to create a memory layer to get all features from the WFS request.
+            # Check geometry type to create a memory layer to get
+            # all features from the WFS request.
             geom_type = QgsWkbTypes.geometryDisplayString(
                 wfs_layer.getFeature(1).geometry().type()
             )
@@ -157,15 +160,17 @@ class WfsRequest:
                     "OVERLAY": clipping_layer,
                     "OUTPUT": "memory:" + str(self.export_name),
                 }
-                new_layer = processing.run("native:clip", clip_parameters)["OUTPUT"]
+                new_layer = processing.run(
+                    "native:clip", clip_parameters)["OUTPUT"]
             if self.path:
-                # Specific procedure if the layer must be saved as a GeoPackage.
+                # Specific procedure if the layer must be saved as a GPKG.
                 # Every data are saved in the same GeoPackage.
                 if self.format == "gpkg":
                     driver = "GPKG"
                     context = self.project.instance().transformContext()
                     options = QgsVectorFileWriter.SaveVectorOptions()
-                    # Check if the GeoPackage already exists, to know if it's need to be created or not
+                    # Check if the GeoPackage already exists,
+                    # to know if it's need to be created or not
                     if os.path.isfile(self.path + "/" + "bd_topo_extract.gpkg"):
                         options.actionOnExistingFile = (
                             QgsVectorFileWriter.CreateOrOverwriteLayer
@@ -211,5 +216,6 @@ class WfsRequest:
                 )["OUTPUT"]
             self.exported.append(self.data)
         else:
-            # If the WFS request has no features the data name is added to the no_data list.
+            # If the WFS request has no features
+            # the data name is added to the no_data list.
             self.no_data.append(self.data)

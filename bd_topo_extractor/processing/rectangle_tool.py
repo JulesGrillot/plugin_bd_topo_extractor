@@ -31,7 +31,8 @@ class RectangleDrawTool(QgsMapTool):
         self.is_left_button_pressed = False
         # create a rubber line object
         # to display the geometry of the dragged object on the canvas
-        self.rubber_band = QgsRubberBand(self.canvas, QgsWkbTypes.PolygonGeometry)
+        self.rubber_band = QgsRubberBand(
+            self.canvas, QgsWkbTypes.PolygonGeometry)
         self.rubber_band.setColor(QColor(255, 0, 0, 50))
         self.rubber_band.setWidth(2)
 
@@ -136,7 +137,8 @@ class RectangleDrawTool(QgsMapTool):
 
                 return QgsRectangle(self.start_point, self.end_point)
             else:
-                # If the drawn rectangle is outside of the max extent, an error message appear
+                # If the drawn rectangle is outside of the max extent,
+                # an error message appear
                 msg = QMessageBox()
                 msg.critical(
                     None,
