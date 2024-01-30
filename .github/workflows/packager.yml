@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           cache: "pip"
           cache-dependency-path: "requirements/packaging.txt"
@@ -43,7 +43,7 @@ jobs:
       - name: Package the latest version
         run: qgis-plugin-ci package latest --allow-uncommitted-changes
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PROJECT_FOLDER }}-latest
           path: ${{ env.PROJECT_FOLDER }}.*.zip

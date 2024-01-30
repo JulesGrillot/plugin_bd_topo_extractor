@@ -4,5 +4,5 @@
 black
 
 
-isort>=5.8,<5.13
+isort>=5.8,<5.14
 pre-commit>=3,<4
