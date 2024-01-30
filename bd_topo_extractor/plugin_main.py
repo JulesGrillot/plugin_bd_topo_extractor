@@ -24,9 +24,9 @@ from qgis.PyQt.QtGui import QDesktopServices, QIcon
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
 from PyQt5.QtCore import pyqtSignal, QObject
 from PyQt5.QtNetwork import (
-    QNetworkAccessManager,
     QNetworkRequest,
     QNetworkReply,
+    QNetworkAccessManager,
 )
 
 # project
@@ -65,6 +65,7 @@ class BdTopoExtractorPlugin:
         """
         self.iface = iface
         self.project = QgsProject.instance()
+        self.manager = QNetworkAccessManager()
         self.log = PlgLogger().log
         self.provider = None
         self.pluginIsActive = False
@@ -98,7 +99,6 @@ class BdTopoExtractorPlugin:
             QIcon(str(__icon_path__)),
             self.tr("{} Extractor".format(__wfs_name__)),
             self.iface.mainWindow(),
-            checkable=True,
         )
         self.iface.addToolBarIcon(self.action_launch)
         self.action_launch.triggered.connect(lambda: self.run())
@@ -206,9 +206,9 @@ class BdTopoExtractorPlugin:
         Try to connect to internet, if successfull, the dialog appear.
         Else an error message appear.
         """
-        self._manager = DownloadManager()
-        self._manager.finished.connect(self.handle_finished)
-        self._manager.ping("https://github.com/")
+        self.internet_checker = InternetChecker(None, self.manager)
+        self.internet_checker.finished.connect(self.handle_finished)
+        self.internet_checker.ping("https://github.com/")
 
     def handle_finished(self):
         # Check if plugin is already launched
@@ -216,7 +216,7 @@ class BdTopoExtractorPlugin:
             self.pluginIsActive = True
             # Open Dialog
             self.dlg = BdTopoExtractorDialog(
-                self.project, self.iface, self.url)
+                self.project, self.iface, self.url, self.manager)
             self.dlg.show()
             # If there is no layers, an OSM layer is added
             # to simplify the rectangle drawing
@@ -374,7 +374,7 @@ class BdTopoExtractorPlugin:
         self.pluginIsActive = False
 
 
-class DownloadManager(QObject):
+class InternetChecker(QObject):
     """Constructor.
 
     Class wich is going to ping a website
@@ -383,9 +383,9 @@ class DownloadManager(QObject):
 
     finished = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, manager=None):
         super().__init__(parent)
-        self._manager = QNetworkAccessManager()
+        self._manager = manager
         self.manager.finished.connect(self.handle_finished)
 
     @property

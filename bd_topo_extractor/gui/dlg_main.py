@@ -35,6 +35,7 @@ from qgis.PyQt.QtWidgets import (
 
 # PyQt
 from PyQt5.QtCore import (
+    QStringListModel,
     Qt,
     QThread,
     pyqtSignal,
@@ -42,6 +43,7 @@ from PyQt5.QtCore import (
 )
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (
+    QCompleter,
     QGridLayout,
     QVBoxLayout,
     QHBoxLayout,
@@ -76,7 +78,7 @@ from bd_topo_extractor.processing import GetCapabilitiesRequest
 
 
 class BdTopoExtractorDialog(QDialog):
-    def __init__(self, project=None, iface=None, url=None):
+    def __init__(self, project=None, iface=None, url=None, manager=None):
         """Constructor.
         :param
         project: The current QGIS project instance
@@ -91,17 +93,13 @@ class BdTopoExtractorDialog(QDialog):
         self.iface = iface
         self.project = project
         self.url = url
+        self.manager = manager
         self.canvas = self.iface.mapCanvas()
 
         self.layer = None
         self.rectangle = None
         self.checked = 0
         self.schema = __wfs_schema__
-
-        self.getcapabilities = GetCapabilitiesRequest(
-            None, self.url, self.schema)
-        self.getcapabilities.finished_dl.connect(self.add_layers)
-        self.getcapabilities.finished_dl.connect(self.set_rectangle_tool)
 
         self.setWindowTitle("{} Extractor".format(__wfs_name__))
 
@@ -214,6 +212,13 @@ class BdTopoExtractorDialog(QDialog):
         )
         self.layout.addWidget(self.select_all_checkbox)
 
+        # Text edition to filter WFS data
+        self.text_data_filter = QLineEdit(self)
+        self.text_data_filter.setEnabled(False)
+        self.text_data_filter.textChanged.connect(
+            lambda: self.filter_by_text(self.text_data_filter.text()))
+        self.layout.addWidget(self.text_data_filter)
+
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -225,8 +230,15 @@ class BdTopoExtractorDialog(QDialog):
         self.layer_check_group = QButtonGroup(self)
         self.layer_check_group.setExclusive(False)
         self.scroll_area.setWidget(self.scroll_area_content)
+        self.checkbox_layout = QGridLayout(self.scroll_area_content)
         self.layout.addWidget(self.scroll_area)
         self.layout.insertSpacing(100, 25)
+
+        self.getcapabilities = GetCapabilitiesRequest(
+            None, self.url, self.schema, self.manager)
+        self.getcapabilities.finished_dl.connect(
+            lambda: self.add_layers(self.getcapabilities.service_layers))
+        self.getcapabilities.finished_dl.connect(self.set_rectangle_tool)
 
         # Geom predicat
         self.geom_layout = QGridLayout()
@@ -417,7 +429,7 @@ class BdTopoExtractorDialog(QDialog):
             self.max_extent_layer.commitChanges()
             self.max_extent_layer.triggerRepaint()
             style_path: Path = (
-                DIR_PLUGIN_ROOT / f"resources/styles/max_extent_style.qml"
+                DIR_PLUGIN_ROOT / f'{"resources/styles/max_extent_style.qml"}'
             )
             self.max_extent_layer.loadNamedStyle(style_path.__str__())
             self.project.instance().addMapLayer(self.max_extent_layer)
@@ -437,14 +449,14 @@ class BdTopoExtractorDialog(QDialog):
             # Reproject the layer
             transformed_extent = self.transform_crs(
                 layer.extent(), layer.crs())
-            if self.getcapabilities.max_bounding_box.intersects(transformed_extent):
+            if self.getcapabilities.max_bounding_box.intersects(transformed_extent):  # noqa: E501
                 if transformed_extent.area() > 100000000:
                     msg = QMessageBox()
                     msg.warning(
                         None,
                         self.tr("Warning"),
                         self.tr(
-                            "Selected layer is very large (degraded performance)"),
+                            "Selected layer is very large (degraded performance)"),  # noqa: E501
                     )
             else:
                 # If the layer is outside of the max extent,
@@ -455,6 +467,36 @@ class BdTopoExtractorDialog(QDialog):
                     self.tr("Error"),
                     self.tr("Selected layer is outside of the WFS' extent."),
                 )
+
+    def filter_by_text(self, searchtext):
+        # Filter layer list by the text in the search bar
+        if searchtext == '':
+            row = 0
+            column = 0
+            # Show all items if searchbar is empty
+            for checkbox in self.layer_check_group.buttons():
+                checkbox.setHidden(False)
+                self.checkbox_layout.addWidget(checkbox, row, column)
+                if column < 2:
+                    column = column + 1
+                else:
+                    column = 0
+                    row = row + 1
+        else:
+            row = 0
+            column = 0
+            # Only show items with text corresponding to searchbar
+            for checkbox in self.layer_check_group.buttons():
+                if searchtext.lower() in checkbox.text().lower():
+                    checkbox.setHidden(False)
+                    self.checkbox_layout.addWidget(checkbox, row, column)
+                    if column < 2:
+                        column = column + 1
+                    else:
+                        column = 0
+                        row = row + 1
+                else:
+                    checkbox.setHidden(True)
 
     def get_result(self):
         # self.select_layer_combo_box.layerChanged.disconnect(self.check_layer_size)
@@ -537,14 +579,15 @@ class BdTopoExtractorDialog(QDialog):
             for button in self.layer_check_group.buttons():
                 button.setChecked(False)
 
-    def add_layers(self):
+    def add_layers(self, layers):
+        self.text_data_filter.setEnabled(True)
         # Add all wfs' data checkboxes to the ui
         row = 0
         column = 0
         # Every checkbox are added to a grid layout
-        layout = QGridLayout(self.scroll_area_content)
+        
         # combo_box = QgsCheckableComboBox(self)
-        for layer in self.getcapabilities.service_layers:
+        for layer in layers:
             checkbox = QCheckBox(self)
             # Format data names to add apostrophe,
             # replace underscore with space
@@ -582,7 +625,7 @@ class BdTopoExtractorDialog(QDialog):
             checkbox.stateChanged.connect(self.check_result)
             self.layer_check_group.addButton(checkbox)
             # Add to the checkboxes to the layout
-            layout.addWidget(checkbox, row, column)
+            self.checkbox_layout.addWidget(checkbox, row, column)
             # combo_box.addItemWithCheckState(
             #     checkbox, Qt.CheckState.Unchecked)
             # 3 columns max
@@ -591,7 +634,7 @@ class BdTopoExtractorDialog(QDialog):
             else:
                 row = row + 1
                 column = 0
-        self.scroll_area_content.setLayout(layout)
+        self.scroll_area_content.setLayout(self.checkbox_layout)
 
     def check_result(self, value):
         # Count the checked checkboxes to know if the Ok button must be enabled

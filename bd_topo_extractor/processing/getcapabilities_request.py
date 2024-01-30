@@ -1,5 +1,5 @@
 import re
-from qgis.core import QgsRectangle, QgsNetworkAccessManager
+from qgis.core import QgsRectangle
 from PyQt5.QtNetwork import QNetworkRequest, QNetworkReply
 from PyQt5.QtCore import QUrl, QObject, pyqtSignal
 
@@ -9,14 +9,14 @@ class GetCapabilitiesRequest(QObject):
     """Get multiples informations from a getcapabilities request.
     List all layers available, get the maximal extent of all the Wfs' data."""
 
-    def __init__(self, parent=None, url=None, schema=None):
+    def __init__(self, parent=None, url=None, schema=None, manager=None):
         super().__init__(parent)
         self.url = url
         self.schema = schema
         self._pending_downloads = 0
         self.service_layers = []
         self.max_bounding_box = QgsRectangle()
-        self.network_manager = QgsNetworkAccessManager()
+        self.network_manager = manager
         self.download()
 
     @property
