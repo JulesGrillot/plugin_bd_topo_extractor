@@ -100,7 +100,7 @@ class GetCapabilitiesRequest(QObject):
                 elif self.schema == "*":
                     layers.append(layer.group(1))
                 else:
-                    pass
+                    print("Error, schema specified in metadata.txt doesn't exist")
 
         print(extent_1)
         print(extent_2)

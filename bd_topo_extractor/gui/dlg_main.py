@@ -35,7 +35,6 @@ from qgis.PyQt.QtWidgets import (
 
 # PyQt
 from PyQt5.QtCore import (
-    QStringListModel,
     Qt,
     QThread,
     pyqtSignal,
@@ -43,7 +42,6 @@ from PyQt5.QtCore import (
 )
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (
-    QCompleter,
     QGridLayout,
     QVBoxLayout,
     QHBoxLayout,
@@ -585,13 +583,15 @@ class BdTopoExtractorDialog(QDialog):
         row = 0
         column = 0
         # Every checkbox are added to a grid layout
-        
         # combo_box = QgsCheckableComboBox(self)
         for layer in layers:
             checkbox = QCheckBox(self)
             # Format data names to add apostrophe,
             # replace underscore with space
-            text_with_spaces = layer.replace("_", " ")
+            if self.schema == "*":
+                text_with_spaces = layer.split(":")[1].replace("_", " ") + " (" + str(layer.split(":")[0]) + ")"
+            else:
+                text_with_spaces = layer.replace("_", " ")
             for elem in [" d ", " l ", " s "]:
                 if elem in text_with_spaces:
                     text_with_spaces = text_with_spaces.replace(

@@ -8,6 +8,7 @@ from qgis.core import (
     QgsWkbTypes,
     QgsCoordinateReferenceSystem,
     QgsRectangle,
+    QgsCoordinateTransform,
 )
 from qgis.gui import QgisInterface
 import processing
@@ -169,6 +170,8 @@ class WfsRequest:
                     driver = "GPKG"
                     context = self.project.instance().transformContext()
                     options = QgsVectorFileWriter.SaveVectorOptions()
+                    tr = QgsCoordinateTransform(QgsCoordinateReferenceSystem(4326), self.crs, self.project.instance())
+                    options.ct = tr
                     # Check if the GeoPackage already exists,
                     # to know if it's need to be created or not
                     if os.path.isfile(self.path + "/" + "bd_topo_extract.gpkg"):
@@ -178,7 +181,7 @@ class WfsRequest:
                     options.layerName = str(self.export_name)
                     options.fileEncoding = new_layer.dataProvider().encoding()
                     options.driverName = driver
-                    QgsVectorFileWriter.writeAsVectorFormatV2(
+                    QgsVectorFileWriter.writeAsVectorFormatV3(
                         new_layer,
                         self.path + "/" + "bd_topo_extract.gpkg",
                         context,
