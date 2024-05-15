@@ -37,6 +37,7 @@ from bd_topo_extractor.__about__ import (
     __uri_homepage__,
     __wfs_uri__,
     __wfs_name__,
+    __uri_tracker__,
 )
 from bd_topo_extractor.gui.dlg_settings import PlgOptionsFactory
 
@@ -406,10 +407,23 @@ class InternetChecker(QObject):
             # If the user does not have an internet connexion,
             # the plugin does not launch.
             msg = QMessageBox()
-            msg.critical(
-                None,
-                self.tr("Error"),
-                self.tr("You are not connected to the Internet."),
-            )
+            if reply.error() == 403:
+                msg.critical(
+                    None,
+                    self.tr("Error"),
+                    self.tr("IGN Services' are down."),
+                )
+            elif reply.error() == 3:
+                msg.critical(
+                    None,
+                    self.tr("Error"),
+                    self.tr("You are not connected to the Internet."),
+                )
+            else:
+                msg.critical(
+                    None,
+                    self.tr("Error"),
+                    self.tr("Code error : {code}\nGo to\n{tracker}\nto report the issue.".format(code=str(reply.error()), tracker=__uri_tracker__)),
+                )
         else:
             self.finished.emit()
