@@ -52,7 +52,7 @@ If you mean to deploy it to the [official QGIS plugins repository](https://plugi
 
 The documentation is generated using Sphinx and is automatically generated through the CI and published on Pages.
 
-- homepage: <https://github.com/JulesGrillot/plugin_bd_topo_extractor>
+- homepage: <https://julesgrillot.github.io/plugin_bd_topo_extractor/>
 - repository: <https://github.com/JulesGrillot/plugin_bd_topo_extractor>
 - tracker: <https://github.com/JulesGrillot/plugin_bd_topo_extractor/issues>
 
