@@ -222,9 +222,7 @@ class BdTopoExtractorPlugin:
             # If there is no layers, an OSM layer is added
             # to simplify the rectangle drawing
             if len(self.project.instance().mapLayers()) == 0:
-                self.project.instance().setCrs(
-                    QgsCoordinateReferenceSystem("EPSG:3857")
-                )
+                
                 # Type of WMTS, url and name
                 type = "xyz"
                 url = "http://tile.openstreetmap.org/{z}/{x}/{y}.png"

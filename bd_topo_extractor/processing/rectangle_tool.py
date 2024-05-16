@@ -11,6 +11,10 @@ from qgis.core import (
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt, pyqtSignal
 
+# project
+from bd_topo_extractor.__about__ import (
+    __wfs_crs__,
+)
 
 class RectangleDrawTool(QgsMapTool):
     signal = pyqtSignal()
@@ -94,11 +98,11 @@ class RectangleDrawTool(QgsMapTool):
             return None
         else:
             # Rectangle reprojection
-            if str(self.project.instance().crs().postgisSrid()) != "4326":
+            if str(self.project.instance().crs().postgisSrid()) != str(__wfs_crs__):
                 start_point = self.transform_geom(
                     QgsGeometry().fromPointXY(self.start_point),
                     self.project.instance().crs(),
-                    QgsCoordinateReferenceSystem("EPSG:4326"),
+                    QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)),
                 )
                 self.start_point = QgsPointXY(
                     start_point.asPoint().x(), start_point.asPoint().y()
@@ -106,7 +110,7 @@ class RectangleDrawTool(QgsMapTool):
                 end_point = self.transform_geom(
                     QgsGeometry().fromPointXY(self.end_point),
                     self.project.instance().crs(),
-                    QgsCoordinateReferenceSystem("EPSG:4326"),
+                    QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)),
                 )
                 self.end_point = QgsPointXY(
                     end_point.asPoint().x(), end_point.asPoint().y()
@@ -120,8 +124,8 @@ class RectangleDrawTool(QgsMapTool):
                     QgsGeometry().fromRect(
                         QgsRectangle(self.start_point, self.end_point)
                     ),
-                    QgsCoordinateReferenceSystem("EPSG:4326"),
-                    QgsCoordinateReferenceSystem("EPSG:3857"),
+                    QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)),
+                    self.project.crs(),
                 )
                 transformed_extent = drawned_rectangle.boundingBox()
                 # If the drawn rectangle is too big, an error message appear

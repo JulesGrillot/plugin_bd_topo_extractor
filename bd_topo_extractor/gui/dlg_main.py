@@ -65,6 +65,7 @@ from bd_topo_extractor.__about__ import (
     __wfs_logo__,
     __wfs_metadata__,
     __wfs_credit__,
+    __wfs_crs__,
 )
 from bd_topo_extractor.processing import RectangleDrawTool
 from bd_topo_extractor.processing import GetCapabilitiesRequest
@@ -371,8 +372,6 @@ class BdTopoExtractorDialog(QDialog):
             self.draw_rectangle_button.setDisabled
         )
 
-        # self.select_layer_combo_box.layerChanged.connect(self.check_layer_size)
-
         self.select_layer_checkbox.stateChanged.connect(
             self.button_box.setEnabled)
         self.select_layer_checkbox.stateChanged.connect(self.erase_rubber_band)
@@ -415,7 +414,7 @@ class BdTopoExtractorDialog(QDialog):
                 self.canvas.refresh()
         else:
             self.max_extent_layer = QgsVectorLayer(
-                "Polygon?crs=epsg:4326", "Max extent", "memory"
+                "Polygon?crs=epsg:" + str(__wfs_crs__), "Max extent", "memory"
             )
             self.max_extent_layer.startEditing()
             new_geom = QgsGeometry().fromRect(
@@ -446,7 +445,7 @@ class BdTopoExtractorDialog(QDialog):
             layer = self.select_layer_combo_box.currentLayer()
             # Reproject the layer
             transformed_extent = self.transform_crs(
-                layer.extent(), layer.crs())
+                layer.extent(), layer.crs(), QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)))
             if self.getcapabilities.max_bounding_box.intersects(transformed_extent):  # noqa: E501
                 if transformed_extent.area() > 100000000:
                     msg = QMessageBox()
@@ -506,17 +505,17 @@ class BdTopoExtractorDialog(QDialog):
             # Remove the map tool to draw the rectangle
             self.canvas.unsetMapTool(self.rectangle_tool)
             # Get the rectangle extent and reproject it
-            self.extent = self.transform_crs(
-                self.rectangle_tool.rectangle(),
-                QgsCoordinateReferenceSystem("EPSG:4326"),
-            )
+            self.extent = self.rectangle_tool.new_extent
         # If the extent is from a layer
         else:
             # Get the layer
             self.layer = self.select_layer_combo_box.currentLayer()
             # Reproject the layer
             self.extent = self.transform_crs(
-                self.layer.extent(), self.layer.crs())
+                self.layer.extent(),
+                self.layer.crs(),
+                QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)),
+            )
 
     def signal_accept(self, msg):
         # Update the progress bar when result is pressed
@@ -654,11 +653,11 @@ class BdTopoExtractorDialog(QDialog):
         elif self.draw_rectangle_checkbox.isChecked():
             self.rectangle = None
 
-    def transform_crs(self, rectangle, input_crs):
+    def transform_crs(self, rectangle, input_crs, output_crs):
         # Reproject a rectangle to the project crs
         geom = QgsGeometry().fromRect(rectangle)
         geom.transform(
-            QgsCoordinateTransform(input_crs, self.project.crs(), self.project)
+            QgsCoordinateTransform(input_crs, output_crs, self.project)
         )
         transformed_extent = geom.boundingBox()
         return transformed_extent

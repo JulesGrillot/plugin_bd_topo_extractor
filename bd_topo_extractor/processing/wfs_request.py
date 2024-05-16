@@ -14,6 +14,11 @@ from qgis.gui import QgisInterface
 import processing
 import os.path
 
+# project
+from bd_topo_extractor.__about__ import (
+    __wfs_geometry__,
+    __wfs_crs__,
+)
 
 class WfsRequest:
     def __init__(
@@ -80,14 +85,15 @@ class WfsRequest:
         self.uri.setParam("typename", self.data)
         self.uri.setParam("title", self.data)
         self.uri.setParam("table", "")
-        self.uri.setParam("srsName", "EPSG:" + str("4326"))
-        sql = "SELECT * FROM \"{data}\" as t1 WHERE ST_Intersects(t1.{geometry_column}, ST_GeometryFromText('Polygon (({xmin} {ymin}, {xmax} {ymin}, {xmax} {ymax}, {xmin} {ymax}, {xmin} {ymin}))', 4326))".format(
+        self.uri.setParam("srsName", "EPSG:" + str(__wfs_crs__))
+        sql = "SELECT * FROM \"{data}\" as t1 WHERE ST_Intersects(t1.{geometry_column}, ST_GeometryFromText('Polygon (({xmin} {ymin}, {xmax} {ymin}, {xmax} {ymax}, {xmin} {ymax}, {xmin} {ymin}))', {crs}))".format(
             data=self.data,
-            geometry_column="geometrie",
+            geometry_column=str(__wfs_geometry__),
             ymin=str(self.boundingbox.yMinimum()),
             xmin=str(self.boundingbox.xMinimum()),
             ymax=str(self.boundingbox.yMaximum()),
             xmax=str(self.boundingbox.xMaximum()),
+            crs=str(__wfs_crs__),
         )
         self.uri.setSql(sql)
 
@@ -126,7 +132,7 @@ class WfsRequest:
                 geom_type = "Linestring"
             # Create a memory layer
             new_layer = QgsVectorLayer(
-                geom_type + "?crs=epsg:4326",
+                geom_type + "?crs=epsg:" + str(__wfs_crs__),
                 str(self.export_name),
                 "memory",
             )
@@ -144,7 +150,7 @@ class WfsRequest:
             if self.geom == "within":
                 # Creation of a layer with the extent.
                 clipping_layer = QgsVectorLayer(
-                    "Polygon?crs=epsg:4326", "clipper", "memory"
+                    "Polygon?crs=epsg:" + str(__wfs_crs__), "clipper", "memory"
                 )
                 clipping_layer.startEditing()
                 new_geom = QgsGeometry().fromRect(self.boundingbox)
@@ -170,7 +176,7 @@ class WfsRequest:
                     driver = "GPKG"
                     context = self.project.instance().transformContext()
                     options = QgsVectorFileWriter.SaveVectorOptions()
-                    tr = QgsCoordinateTransform(QgsCoordinateReferenceSystem(4326), self.crs, self.project.instance())
+                    tr = QgsCoordinateTransform(QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)), self.crs, self.project.instance())
                     options.ct = tr
                     # Check if the GeoPackage already exists,
                     # to know if it's need to be created or not
