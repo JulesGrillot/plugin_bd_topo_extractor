@@ -7,6 +7,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
     QgsGeometry,
+    QgsDistanceArea,
 )
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt, pyqtSignal
@@ -15,6 +16,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from bd_topo_extractor.__about__ import (
     __wfs_crs__,
 )
+
 
 class RectangleDrawTool(QgsMapTool):
     signal = pyqtSignal()
@@ -120,16 +122,11 @@ class RectangleDrawTool(QgsMapTool):
             if self.max_extent.intersects(
                 QgsRectangle(self.start_point, self.end_point)
             ):
-                drawned_rectangle = self.transform_geom(
-                    QgsGeometry().fromRect(
-                        QgsRectangle(self.start_point, self.end_point)
-                    ),
-                    QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)),
-                    self.project.crs(),
-                )
-                transformed_extent = drawned_rectangle.boundingBox()
                 # If the drawn rectangle is too big, an error message appear
-                if transformed_extent.area() > 100000000:
+                area = QgsDistanceArea()
+                ellipsoid = QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)).ellipsoidAcronym()
+                area.setEllipsoid(ellipsoid)
+                if area.measureArea(QgsGeometry().fromRect(QgsRectangle(self.start_point, self.end_point))) > 100000000:
                     msg = QMessageBox()
                     msg.warning(
                         None,

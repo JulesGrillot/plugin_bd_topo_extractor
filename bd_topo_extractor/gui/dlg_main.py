@@ -16,6 +16,7 @@ from qgis.core import (
     QgsMapLayerProxyModel,
     QgsFeature,
     QgsVectorLayer,
+    QgsDistanceArea,
 )
 from qgis.gui import (
     QgsMapLayerComboBox,
@@ -25,6 +26,7 @@ from qgis.PyQt.Qt import QUrl
 from qgis.PyQt.QtGui import (
     QDesktopServices,
     QIcon,
+    QMovie,
 )
 from qgis.PyQt.QtWidgets import (
     QDialog,
@@ -39,6 +41,7 @@ from PyQt5.QtCore import (
     QThread,
     pyqtSignal,
     QSize,
+    QRect,
 )
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (
@@ -59,6 +62,7 @@ from PyQt5.QtWidgets import (
 # project
 from bd_topo_extractor.__about__ import (
     DIR_PLUGIN_ROOT,
+    __loading_gif__,
     __uri_homepage__,
     __wfs_name__,
     __wfs_schema__,
@@ -336,6 +340,10 @@ class BdTopoExtractorDialog(QDialog):
         self.accepted.connect(self.get_result)
         self.rejected.connect(self.disconnect)
 
+        # loading gif
+        self.loading_gif_label = QLabel(self)
+        self.layout.addWidget(self.loading_gif_label)
+
         # Progress Bar
         self.select_progress_bar_label = QLabel(self)
         self.select_progress_bar_label.setText("")
@@ -445,9 +453,15 @@ class BdTopoExtractorDialog(QDialog):
             layer = self.select_layer_combo_box.currentLayer()
             # Reproject the layer
             transformed_extent = self.transform_crs(
-                layer.extent(), layer.crs(), QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)))
+                layer.extent(),
+                layer.crs(),
+                QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)),
+            )
             if self.getcapabilities.max_bounding_box.intersects(transformed_extent):  # noqa: E501
-                if transformed_extent.area() > 100000000:
+                area = QgsDistanceArea()
+                ellipsoid = QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)).ellipsoidAcronym()
+                area.setEllipsoid(ellipsoid)
+                if area.measureArea(QgsGeometry.fromRect(transformed_extent)) > 100000000:
                     msg = QMessageBox()
                     msg.warning(
                         None,
@@ -496,6 +510,12 @@ class BdTopoExtractorDialog(QDialog):
                     checkbox.setHidden(True)
 
     def get_result(self):
+        self.loading_gif = QMovie(str(__loading_gif__))
+        self.loading_gif_label.setMovie(self.loading_gif)
+        size = QSize(200, 120,)
+        movie = self.loading_gif_label.movie()
+        movie.setScaledSize(size)
+        self.loading_gif.start()
         # self.select_layer_combo_box.layerChanged.disconnect(self.check_layer_size)
         # Accepted result from the dialog
         # If the extent is from a drawn rectangle

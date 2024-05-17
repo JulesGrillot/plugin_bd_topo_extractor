@@ -66,6 +66,7 @@ __email__: str = __plugin_md__.get("general").get("email")
 __icon_path__: Path = DIR_PLUGIN_ROOT.resolve() / __plugin_md__.get("general").get(
     "icon"
 )
+__loading_gif__: Path = DIR_PLUGIN_ROOT.resolve() / __plugin_md__.get("general").get("loading")
 __keywords__: list = [
     t.strip() for t in __plugin_md__.get("general").get("repository").split("tags")
 ]
