@@ -9,6 +9,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsRectangle,
     QgsCoordinateTransform,
+    Qgis,
 )
 from qgis.gui import QgisInterface
 import processing
@@ -170,43 +171,58 @@ class WfsRequest:
                 new_layer = processing.run(
                     "native:clip", clip_parameters)["OUTPUT"]
             if self.path:
+                context = self.project.instance().transformContext()
+                options = QgsVectorFileWriter.SaveVectorOptions()
+                tr = QgsCoordinateTransform(QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)), self.crs, self.project.instance())
+                options.ct = tr
+                options.layerName = str(self.export_name)
+                options.fileEncoding = new_layer.dataProvider().encoding()
                 # Specific procedure if the layer must be saved as a GPKG.
                 # Every data are saved in the same GeoPackage.
                 if self.format == "gpkg":
-                    driver = "GPKG"
-                    context = self.project.instance().transformContext()
-                    options = QgsVectorFileWriter.SaveVectorOptions()
-                    tr = QgsCoordinateTransform(QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)), self.crs, self.project.instance())
-                    options.ct = tr
+                    options.driverName = "GPKG"
                     # Check if the GeoPackage already exists,
                     # to know if it's need to be created or not
                     if os.path.isfile(self.path + "/" + "bd_topo_extract.gpkg"):
                         options.actionOnExistingFile = (
                             QgsVectorFileWriter.CreateOrOverwriteLayer
                         )
-                    options.layerName = str(self.export_name)
-                    options.fileEncoding = new_layer.dataProvider().encoding()
-                    options.driverName = driver
-                    QgsVectorFileWriter.writeAsVectorFormatV3(
-                        new_layer,
-                        self.path + "/" + "bd_topo_extract.gpkg",
-                        context,
-                        options,
-                    )
+                    
+                    if Qgis.QGIS_VERSION_INT > 32000:
+                        QgsVectorFileWriter.writeAsVectorFormatV3(
+                            new_layer,
+                            self.path + "/" + "bd_topo_extract.gpkg",
+                            context,
+                            options,
+                        )
+                    else:
+                        QgsVectorFileWriter.writeAsVectorFormatV2(
+                            new_layer,
+                            self.path + "/" + "bd_topo_extract.gpkg",
+                            context,
+                            options,
+                        )
                     self.final_layer = self.path + "/" + "bd_topo_extract.gpkg"
                 else:
                     # For every other format, the procedure is the same.
                     if self.format == "shp":
-                        driver = "ESRI Shapefile"
+                        options.driverName = "ESRI Shapefile"
                     elif self.format == "geojson":
-                        driver = "GeoJSON"
-                    QgsVectorFileWriter.writeAsVectorFormat(
-                        new_layer,
-                        output,
-                        "utf-8",
-                        self.crs,
-                        driver,
-                    )
+                        options.driverName = "GeoJSON"
+                    if Qgis.QGIS_VERSION_INT > 32000:
+                        QgsVectorFileWriter.writeAsVectorFormatV3(
+                            new_layer,
+                            output,
+                            context,
+                            options,
+                        )
+                    else:
+                        QgsVectorFileWriter.writeAsVectorFormatV2(
+                            new_layer,
+                            output,
+                            context,
+                            options,
+                        )
                     self.final_layer = QgsVectorLayer(
                         output,
                         str(self.export_name),
