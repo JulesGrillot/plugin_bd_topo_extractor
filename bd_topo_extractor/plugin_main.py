@@ -9,6 +9,7 @@ from functools import partial
 from pathlib import Path
 import datetime
 import os.path
+import json
 
 # PyQGIS
 from qgis.core import (
@@ -38,6 +39,8 @@ from bd_topo_extractor.__about__ import (
     __wfs_uri__,
     __wfs_name__,
     __uri_tracker__,
+    __wfs_layer_order__,
+    __wfs_style__,
 )
 from bd_topo_extractor.gui.dlg_settings import PlgOptionsFactory
 
@@ -324,7 +327,30 @@ class BdTopoExtractorPlugin:
                     ):
                         self.project.instance().addMapLayer(
                             request.final_layer, False)
-                        group.addLayer(request.final_layer)
+                        # If styled layer are set to true in metadata.txt, a specific style is applied to every layer.
+                        if __wfs_style__:
+                            # style name is based on layer name in uppercase with underscore instead of spaces and single quotes
+                            style_name = str(request.final_layer.name()).replace("'", "_").replace(" ", "_").upper()
+                            layer_order_dict = json.loads(__wfs_layer_order__)
+                            # the layer are ordered based on a dictionnary with theme as key.
+                            for elem in layer_order_dict:
+                                if style_name in list(layer_order_dict[elem].keys()):
+                                    theme = self.project.instance().layerTreeRoot().findGroup(elem)
+                                    # if the theme doesn't exists it is created.
+                                    if not theme:
+                                        group.insertGroup(int(layer_order_dict['ORDER'][elem]), elem)
+                                        theme = self.project.instance().layerTreeRoot().findGroup(elem)
+                            theme.addLayer(request.final_layer)
+                            style_name_ext = style_name + ".qml"
+                            style_path: Path = (
+                                DIR_PLUGIN_ROOT / f'{"resources/styles"}' / f'{style_name_ext}')
+                            # if the style exists it is added to the layer.
+                            if os.path.isfile(style_path.__str__()):
+                                request.final_layer.loadNamedStyle(style_path.__str__())
+                            else:
+                                print("ERROR : style " + str(style_name_ext) + " doesn't exists.")
+                        else:
+                            group.addLayer(request.final_layer)
 
                 # Increase the ProgressBar value
                 n = n + 1
