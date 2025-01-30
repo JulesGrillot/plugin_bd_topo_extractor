@@ -7,9 +7,15 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
     QgsGeometry,
+    QgsDistanceArea,
 )
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt, pyqtSignal
+
+# project
+from bd_topo_extractor.__about__ import (
+    __wfs_crs__,
+)
 
 
 class RectangleDrawTool(QgsMapTool):
@@ -94,11 +100,11 @@ class RectangleDrawTool(QgsMapTool):
             return None
         else:
             # Rectangle reprojection
-            if str(self.project.instance().crs().postgisSrid()) != "4326":
+            if str(self.project.instance().crs().postgisSrid()) != str(__wfs_crs__):
                 start_point = self.transform_geom(
                     QgsGeometry().fromPointXY(self.start_point),
                     self.project.instance().crs(),
-                    QgsCoordinateReferenceSystem("EPSG:4326"),
+                    QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)),
                 )
                 self.start_point = QgsPointXY(
                     start_point.asPoint().x(), start_point.asPoint().y()
@@ -106,7 +112,7 @@ class RectangleDrawTool(QgsMapTool):
                 end_point = self.transform_geom(
                     QgsGeometry().fromPointXY(self.end_point),
                     self.project.instance().crs(),
-                    QgsCoordinateReferenceSystem("EPSG:4326"),
+                    QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)),
                 )
                 self.end_point = QgsPointXY(
                     end_point.asPoint().x(), end_point.asPoint().y()
@@ -116,16 +122,11 @@ class RectangleDrawTool(QgsMapTool):
             if self.max_extent.intersects(
                 QgsRectangle(self.start_point, self.end_point)
             ):
-                drawned_rectangle = self.transform_geom(
-                    QgsGeometry().fromRect(
-                        QgsRectangle(self.start_point, self.end_point)
-                    ),
-                    QgsCoordinateReferenceSystem("EPSG:4326"),
-                    QgsCoordinateReferenceSystem("EPSG:3857"),
-                )
-                transformed_extent = drawned_rectangle.boundingBox()
                 # If the drawn rectangle is too big, an error message appear
-                if transformed_extent.area() > 100000000:
+                area = QgsDistanceArea()
+                ellipsoid = QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)).ellipsoidAcronym()
+                area.setEllipsoid(ellipsoid)
+                if area.measureArea(QgsGeometry().fromRect(QgsRectangle(self.start_point, self.end_point))) > 100000000:
                     msg = QMessageBox()
                     msg.warning(
                         None,

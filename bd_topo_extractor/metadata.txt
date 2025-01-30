@@ -1,10 +1,11 @@
 [general]
-name =BD TOPO® Extractor
+name=BD TOPO® Extractor
 about=It allows the user to extract elements from IGN's BD TOPO® with an extent or inside a layer as reference.
 category=Vector
 hasProcessingProvider=yes
 description=This tool allows you to extract specific data from IGN's BD TOPO®. The extraction is based on either an extent drawned by the user on the map canvas or a layer's extent.
 icon=resources/images/default_icon.png
+loading=resources/images/loading.gif
 tags=vector, france, bdtopo, ign, export, ign france
 
 # credits and contact
@@ -21,8 +22,13 @@ qgisMinimumVersion=3.10
 qgisMaximumVersion=3.99
 
 # versioning
-version=1.0.0
-changelog=sphinx documentation, add metadata variable for schema, geometry column and crs.
+version=1.0.2
+changelog=
+    1.0.0 sphinx documentation, add metadata variable for schema, geometry column and crs.
+    1.0.1 crs correction.
+    1.0.2 crs correction for area calculation, adding a gif when export is loading
+    1.1.0 add group by themes and style created by IGN.
+
 
 [wfs]
 plugin_name=BD_TOPO_Extractor
@@ -30,7 +36,9 @@ name=BD TOPO®
 uri=https://data.geopf.fr/wfs/ows
 schema=BDTOPO_V3
 geometry=geometrie
-crs=3857
-metadata=https://geoservices.ign.fr/bdtopo
+crs=4326
+style=true
+layer_order={"TRANSPORT": {"TRONCON_DE_ROUTE": "0", "ROUTE_NUMEROTEE_OU_NOMMEE": "1", "TRONCON_DE_VOIE_FERREE": "2", "EQUIPEMENT_DE_TRANSPORT": "3", "PISTE_D_AERODROME": "4", "AERODROME": "5", "POINT_DE_REPERE": "6", "NON_COMMUNICATION": "7", "POINT_DU_RESEAU": "8", "TRANSPORT_PAR_CABLE": "9", "VOIE_FERREE_NOMMEE": "10", "TOPONYMIE_TRANSPORT": "11"}, "BATI": {"BATIMENT": "0", "CIMETIERE": "1", "CONSTRUCTION_PONCTUELLE": "2", "CONSTRUCTION_LINEAIRE": "3", "CONSTRUCTION_SURFACIQUE": "4", "RESERVOIR": "5", "LIGNE_OROGRAPHIQUE": "6", "PYLONE": "7", "TERRAIN_DE_SPORT": "8", "TOPONYMIE_BATI": "9"}, "LIEUX_NOMMEES": {"DETAIL_OROGRAPHIQUE": "0", "ZONE_D_HABITATION": "1", "LIEU_DIT_NON_HABITE": "2", "TOPONYMIE_LIEUX_NOMMES": "3"}, "SERVICES_ET_ACTIVITES": {"CANALISATION": "0", "LIGNE_ELECTRIQUE": "1", "POSTE_DE_TRANSFORMATION": "2", "ERP": "3", "ZONE_D_ACTIVITE_OU_D_INTERET": "4", "TOPONYMIE_SERVICES_ET_ACTIVITES": "5"}, "ADMINISTRATIF": {"ARRONDISSEMENT_MUNICIPAL": "0", "COMMUNE": "1", "COMMUNE_ASSOCIEE_OU_DELEGUEE": "2", "ARRONDISSEMENT": "3", "CONDOMINIUM": "4", "DEPARTEMENT": "5", "COLLECTIVITE_TERRITORIALE": "6", "EPCI": "7", "REGION": "8"}, "HYDROGRAPHIE": {"COURS_D_EAU": "0", "TRONCON_HYDROGRAPHIQUE": "1", "SURFACE_HYDROGRAPHIQUE": "2", "PLAN_D_EAU": "3", "DETAIL_HYDROGRAPHIQUE": "4", "LIMITE_TERRE_MER": "5", "NOEUD_HYDROGRAPHIQUE": "6", "BASSIN_VERSANT_TOPOGRAPHIQUE": "7", "TOPONYMIE_HYDROGRAPHIE": "8"}, "ZONES_REGLEMENTEES": {"PARC_OU_RESERVE": "0", "FORET_PUBLIQUE": "1", "TOPONYMIE_ZONES_REGLEMENTEES": "2"}, "OCCUPATION_DU_SOL": {"HAIE": "0", "ZONE_DE_VEGETATION": "1", "ZONE_D_ESTRAN": "2"}, "ORDER": {"TRANSPORT": "0", "BATI": "1", "LIEUX_NOMMEES": "2", "SERVICES_ET_ACTIVITES": "3", "ADMINISTRATIF": "4", "HYDROGRAPHIE": "5", "ZONES_REGLEMENTEES": "6", "OCCUPATION_DU_SOL": "7"}}
+metadata=https://geoservices.ign.fr/bd-topor-explorer-descriptif-de-contenu
 producer=https://www.ign.fr/
 logo=resources/images/logo.png
