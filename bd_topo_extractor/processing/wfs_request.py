@@ -1,25 +1,24 @@
-from qgis.core import (
-    QgsVectorLayer,
-    QgsProject,
-    QgsDataSourceUri,
-    QgsGeometry,
-    QgsFeature,
-    QgsVectorFileWriter,
-    QgsWkbTypes,
-    QgsCoordinateReferenceSystem,
-    QgsRectangle,
-    QgsCoordinateTransform,
-    Qgis,
-)
-from qgis.gui import QgisInterface
-import processing
 import os.path
 
-# project
-from bd_topo_extractor.__about__ import (
-    __wfs_geometry__,
-    __wfs_crs__,
+import processing
+from qgis.core import (
+    Qgis,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsDataSourceUri,
+    QgsFeature,
+    QgsGeometry,
+    QgsProject,
+    QgsRectangle,
+    QgsVectorFileWriter,
+    QgsVectorLayer,
+    QgsWkbTypes,
 )
+from qgis.gui import QgisInterface
+
+# project
+from bd_topo_extractor.__about__ import __wfs_crs__, __wfs_geometry__
+
 
 class WfsRequest:
     def __init__(
@@ -38,7 +37,7 @@ class WfsRequest:
         good: list,
     ):
         """Constructor.
-        :param 
+        :param
         project: The current QGIS project instance
         iface: An interface instance that will be passed to this class which \
         provides the hook by which you can manipulate \
@@ -87,7 +86,7 @@ class WfsRequest:
         self.uri.setParam("title", self.data)
         self.uri.setParam("table", "")
         self.uri.setParam("srsName", "EPSG:" + str(__wfs_crs__))
-        sql = "SELECT * FROM \"{data}\" as t1 WHERE ST_Intersects(t1.{geometry_column}, ST_GeometryFromText('Polygon (({xmin} {ymin}, {xmax} {ymin}, {xmax} {ymax}, {xmin} {ymax}, {xmin} {ymin}))', {crs}))".format(
+        sql = "SELECT * FROM \"{data}\" as t1 WHERE ST_Intersects(t1.{geometry_column}, ST_GeometryFromText('Polygon (({xmin} {ymin}, {xmax} {ymin}, {xmax} {ymax}, {xmin} {ymax}, {xmin} {ymin}))', {crs}))".format(  # noqa: E501
             data=self.data,
             geometry_column=str(__wfs_geometry__),
             ymin=str(self.boundingbox.yMinimum()),
@@ -114,11 +113,7 @@ class WfsRequest:
             if self.path:
                 # Creation of the output path used for SHP and GeoJSON.
                 output = (
-                        self.path
-                        + "/"
-                        + str(self.export_name)
-                        + "."
-                        + str(self.format)
+                    self.path + "/" + str(self.export_name) + "." + str(self.format)
                 )
             else:
                 # Output for a memory layer.
@@ -168,12 +163,15 @@ class WfsRequest:
                     "OVERLAY": clipping_layer,
                     "OUTPUT": "memory:" + str(self.export_name),
                 }
-                new_layer = processing.run(
-                    "native:clip", clip_parameters)["OUTPUT"]
+                new_layer = processing.run("native:clip", clip_parameters)["OUTPUT"]
             if self.path:
                 context = self.project.instance().transformContext()
                 options = QgsVectorFileWriter.SaveVectorOptions()
-                tr = QgsCoordinateTransform(QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)), self.crs, self.project.instance())
+                tr = QgsCoordinateTransform(
+                    QgsCoordinateReferenceSystem("EPSG:" + str(__wfs_crs__)),
+                    self.crs,
+                    self.project.instance(),
+                )  # noqa: E501
                 options.ct = tr
                 options.layerName = str(self.export_name)
                 options.fileEncoding = new_layer.dataProvider().encoding()
@@ -183,11 +181,13 @@ class WfsRequest:
                     options.driverName = "GPKG"
                     # Check if the GeoPackage already exists,
                     # to know if it's need to be created or not
-                    if os.path.isfile(self.path + "/" + "bd_topo_extract.gpkg"):
+                    if os.path.isfile(
+                        self.path + "/" + "bd_topo_extract.gpkg"
+                    ):  # noqa: E501
                         options.actionOnExistingFile = (
                             QgsVectorFileWriter.CreateOrOverwriteLayer
                         )
-                    
+
                     if Qgis.QGIS_VERSION_INT > 32000:
                         QgsVectorFileWriter.writeAsVectorFormatV3(
                             new_layer,

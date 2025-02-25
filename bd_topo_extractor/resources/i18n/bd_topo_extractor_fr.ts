@@ -2,200 +2,96 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="fr_FR" sourcelanguage="en">
 <context>
-    <name>BdTopoExtractorDialog</name>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="172"/>
-        <source>Use layer extent to extract data :</source>
-        <translation>Utiliser l&apos;emprise d&apos;une couche pour l&apos;extraction :</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="117"/>
-        <source>Data provided by :</source>
-        <translation>Données fournies par :</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="134"/>
-        <source>Documentation</source>
-        <translation>Documentation</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="141"/>
-        <source>Metadata</source>
-        <translation>Metadonnées</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="152"/>
-        <source>Draw an extent to extract data :</source>
-        <translation>Dessiner une emprise pour extraire les données :</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="196"/>
-        <source>Draw the extent on the map</source>
-        <translation>Tracer l&apos;emprise maximum du WFS sur la carte</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="316"/>
-        <source>Ok</source>
-        <translation>Ok</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="164"/>
-        <source>Draw an extent</source>
-        <translation>Tracer une emprise</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="206"/>
-        <source>Data extracted from </source>
-        <translation>Données extraite de </translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="212"/>
-        <source>Extract all data from </source>
-        <translation>Extraire toutes les données de </translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="238"/>
-        <source>Keep data intersecting the extent</source>
-        <translation>Conserver les données intersectant l&apos;emprise</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="243"/>
-        <source>Clip data intersecting the extent</source>
-        <translation>Découper les données intersectant l&apos;emprise</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="249"/>
-        <source>Select outputs&apos; coordinate system :</source>
-        <translation>Sélectionner la projection en sortie :</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="259"/>
-        <source>Add exported data to the project</source>
-        <translation>Ajouter les données exportées au projet</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="268"/>
-        <source>Save the results :</source>
-        <translation>Sauvergarder les résultats :</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="298"/>
-        <source>Explore folders :</source>
-        <translation>Parcourir les dossiers :</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="317"/>
-        <source>Cancel</source>
-        <translation>Annuler</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="481"/>
-        <source>Select an output folder</source>
-        <translation>Sélectionner un dossier de sortie</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="430"/>
-        <source>Warning</source>
-        <translation>Attention</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="430"/>
-        <source>Selected layer is very large (degraded performance)</source>
-        <translation>La couche sélectionnée est très grande (performances dégradées)</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="438"/>
-        <source>Error</source>
-        <translation>Erreur</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dlg_settings.py" line="438"/>
-        <source>Selected layer is outside of the WFS&apos; extent.</source>
-        <translation>La couche sélectionnée est en dehors de l&apos;emprise du WFS.</translation>
-    </message>
-</context>
-<context>
     <name>BdTopoExtractorPlugin</name>
     <message>
-        <location filename="../../plugin_main.py" line="99"/>
+        <location filename="../../plugin_main.py" line="109"/>
         <source>Help</source>
         <translation>Aide</translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="108"/>
+        <location filename="../../plugin_main.py" line="118"/>
         <source>Settings</source>
         <translation>Paramètres</translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="203"/>
-        <source>Everything ran OK.</source>
-        <translation>Tout c&apos;est bien passé.</translation>
-    </message>
-    <message>
-        <location filename="../../plugin_main.py" line="209"/>
-        <source>Houston, we&apos;ve got a problem: {}</source>
-        <translation>Un problème a été rencontré: {}</translation>
-    </message>
-    <message>
-        <location filename="../../plugin_main.py" line="262"/>
-        <source>You are not connected to the Internet.</source>
-        <translation>Vous n&apos;êtes pas connecté à internet.</translation>
-    </message>
-    <message>
-        <location filename="../../plugin_main.py" line="91"/>
+        <location filename="../../plugin_main.py" line="102"/>
         <source>{} Extractor</source>
         <translation>{} Extractor</translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="357"/>
+        <location filename="../../plugin_main.py" line="361"/>
         <source>Downloaded data : </source>
         <translation>Données téléchargées : </translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="262"/>
-        <source>Error</source>
-        <translation>Erreur</translation>
-    </message>
-    <message>
-        <location filename="../../plugin_main.py" line="381"/>
+        <location filename="../../plugin_main.py" line="385"/>
         <source>Informations</source>
         <translation>Informations</translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="381"/>
+        <location filename="../../plugin_main.py" line="385"/>
         <source>No data number : </source>
         <translation>Données absentes : </translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="381"/>
+        <location filename="../../plugin_main.py" line="385"/>
         <source>Data number : </source>
         <translation>Données récupérées : </translation>
     </message>
     <message>
-        <location filename="../../plugin_main.py" line="381"/>
+        <location filename="../../plugin_main.py" line="385"/>
         <source>Total data : </source>
         <translation>Données totales : </translation>
     </message>
 </context>
 <context>
-    <name>RectangleDrawTool</name>
+    <name>InternetChecker</name>
     <message>
-        <location filename="../../processing/rectangle_tool.py" line="141"/>
-        <source>Drawned rectangle is outside of the WFS&apos; extent.</source>
-        <translation>Le rectangle tracé est en dehors de l&apos;emprise du WFS.</translation>
+        <location filename="../../plugin_main.py" line="449"/>
+        <source>Error</source>
+        <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../../processing/rectangle_tool.py" line="129"/>
+        <location filename="../../plugin_main.py" line="437"/>
+        <source>IGN Services&apos; are down.</source>
+        <translation>Les services IGN&apos; sont injoignables.</translation>
+    </message>
+    <message>
+        <location filename="../../plugin_main.py" line="443"/>
+        <source>You are not connected to the Internet.</source>
+        <translation>Non connecté à internet.</translation>
+    </message>
+    <message>
+        <location filename="../../plugin_main.py" line="449"/>
+        <source>Code error : {code}
+Go to
+{tracker}
+to report the issue.</source>
+        <translation>Code erreur : {code}
+        Rendez-vous ici
+        {tracker}
+        pour identifier le problème.</translation>
+    </message>
+</context>
+<context>
+    <name>RectangleDrawTool</name>
+    <message>
+        <location filename="../../processing/rectangle_tool.py" line="144"/>
+        <source>Drawned rectangle is outside of the WFS&apos; extent.</source>
+        <translation>Le rectangle tracé est en dehors de l'emprise du WFS.</translation>
+    </message>
+    <message>
+        <location filename="../../processing/rectangle_tool.py" line="131"/>
         <source>Warning</source>
         <translation>Attention</translation>
     </message>
     <message>
-        <location filename="../../processing/rectangle_tool.py" line="129"/>
+        <location filename="../../processing/rectangle_tool.py" line="131"/>
         <source>Drawned rectangle is very large (degraded performances)</source>
         <translation>Le rectangle tracé est trop grand (performances dégradées)</translation>
     </message>
     <message>
-        <location filename="../../processing/rectangle_tool.py" line="141"/>
+        <location filename="../../processing/rectangle_tool.py" line="144"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>

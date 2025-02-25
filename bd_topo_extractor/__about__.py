@@ -50,7 +50,9 @@ def plugin_metadata_as_dict() -> dict:
         config.read(PLG_METADATA_FILE.resolve(), encoding="UTF-8")
         return {s: dict(config.items(s)) for s in config.sections()}
     else:
-        raise IOError("Plugin metadata.txt not found at: %s" % PLG_METADATA_FILE)
+        raise OSError(
+            "Plugin metadata.txt not found at: %s" % PLG_METADATA_FILE
+        )  # noqa: E501
 
 
 # ############################################################################
@@ -61,14 +63,19 @@ def plugin_metadata_as_dict() -> dict:
 __plugin_md__: dict = plugin_metadata_as_dict()
 
 __author__: str = __plugin_md__.get("general").get("author")
-__copyright__: str = "2023 - {0}, {1}".format(date.today().year, __author__)
+__copyright__: str = f"2023 - {date.today().year}, {__author__}"
 __email__: str = __plugin_md__.get("general").get("email")
-__icon_path__: Path = DIR_PLUGIN_ROOT.resolve() / __plugin_md__.get("general").get(
+__icon_path__: Path = DIR_PLUGIN_ROOT.resolve() / __plugin_md__.get(
+    "general"
+).get(  # noqa: E501
     "icon"
 )
-__loading_gif__: Path = DIR_PLUGIN_ROOT.resolve() / __plugin_md__.get("general").get("loading")
+__loading_gif__: Path = DIR_PLUGIN_ROOT.resolve() / __plugin_md__.get("general").get(
+    "loading"
+)  # noqa: E501
 __keywords__: list = [
-    t.strip() for t in __plugin_md__.get("general").get("repository").split("tags")
+    t.strip()
+    for t in __plugin_md__.get("general").get("repository").split("tags")  # noqa: E501
 ]
 __license__: str = "None"
 __summary__: str = "{}\n{}".format(
@@ -76,7 +83,7 @@ __summary__: str = "{}\n{}".format(
     __plugin_md__.get("general").get("about"),
 )
 
-__title__: str = "{0}".format(__plugin_md__.get("wfs").get("plugin_name"))
+__title__: str = "{}".format(__plugin_md__.get("wfs").get("plugin_name"))
 __title_clean__: str = "".join(e for e in __title__ if e.isalnum())
 
 __uri_homepage__: str = __plugin_md__.get("general").get("homepage")
@@ -101,7 +108,9 @@ __wfs_style__: str = __plugin_md__.get("wfs").get("style")
 __wfs_layer_order__: str = __plugin_md__.get("wfs").get("layer_order")
 __wfs_metadata__: str = __plugin_md__.get("wfs").get("metadata")
 __wfs_credit__: str = __plugin_md__.get("wfs").get("producer")
-__wfs_logo__: Path = DIR_PLUGIN_ROOT.resolve() / __plugin_md__.get("wfs").get("logo")
+__wfs_logo__: Path = DIR_PLUGIN_ROOT.resolve() / __plugin_md__.get("wfs").get(
+    "logo"
+)  # noqa: E501
 
 # #############################################################################
 # ##### Main #######################
@@ -110,7 +119,7 @@ if __name__ == "__main__":
     plugin_md = plugin_metadata_as_dict()
     assert isinstance(plugin_md, dict)
     assert (
-        "{0}".format(
+        "{}".format(
             __plugin_md__.get("wfs").get("plugin_name"),
         )
         == __title__

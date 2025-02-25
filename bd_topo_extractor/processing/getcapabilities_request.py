@@ -1,7 +1,8 @@
 import re
+
 from qgis.core import QgsRectangle
-from PyQt5.QtNetwork import QNetworkRequest, QNetworkReply
-from PyQt5.QtCore import QUrl, QObject, pyqtSignal
+from qgis.PyQt.QtCore import QObject, QUrl, pyqtSignal
+from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
 
 
 class GetCapabilitiesRequest(QObject):
@@ -24,7 +25,7 @@ class GetCapabilitiesRequest(QObject):
         return self._pending_downloads
 
     def download(self):
-        url = QUrl("{url}?service=wfs&request=GetCapabilities".format(url=self.url))
+        url = QUrl(f"{self.url}?service=wfs&request=GetCapabilities")
         request = QNetworkRequest(url)
         self.reply = self.network_manager.get(request)
         self.reply.finished.connect(self.handle_finished)
@@ -33,7 +34,9 @@ class GetCapabilitiesRequest(QObject):
     def handle_finished(self):
         self._pending_downloads -= 1
         if self.reply.error() != QNetworkReply.NoError:
-            print(f"code: {self.reply.error()} message: {self.reply.errorString()}")
+            print(
+                f"code: {self.reply.error()} message: {self.reply.errorString()}"
+            )  # noqa: E501
         else:
             data = self.reply.readAll().data().decode()
             (
@@ -46,10 +49,10 @@ class GetCapabilitiesRequest(QObject):
     def list_layers(self, data):
         # Use regex to find the informations.
         name_string = "<Name>(.+?)</Name><Title>"
-        extent_1_string = "<ows:LowerCorner>([+-]?\d+(?:\.\d+)?)"
-        extent_2_string = "([+-]?\d+(?:\.\d+)?)</ows:LowerCorner>"
-        extent_3_string = "<ows:UpperCorner>([+-]?\d+(?:\.\d+)?)"
-        extent_4_string = "([+-]?\d+(?:\.\d+)?)</ows:UpperCorner>"
+        extent_1_string = r"<ows:LowerCorner>([+-]?\d+(?:\.\d+)?)"
+        extent_2_string = r"([+-]?\d+(?:\.\d+)?)</ows:LowerCorner>"
+        extent_3_string = r"<ows:UpperCorner>([+-]?\d+(?:\.\d+)?)"
+        extent_4_string = r"([+-]?\d+(?:\.\d+)?)</ows:UpperCorner>"
         extent_1 = None
         extent_2 = None
         extent_3 = None
@@ -100,7 +103,9 @@ class GetCapabilitiesRequest(QObject):
                 elif self.schema == "*":
                     layers.append(layer.group(1))
                 else:
-                    print("Error, schema specified in metadata.txt doesn't exist")
+                    print(
+                        "Error, schema specified in metadata.txt doesn't exist"
+                    )  # noqa: E501
 
         print(extent_1)
         print(extent_2)

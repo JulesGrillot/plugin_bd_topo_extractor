@@ -22,7 +22,7 @@ qgisMinimumVersion=3.10
 qgisMaximumVersion=3.99
 
 # versioning
-version=1.0.2
+version=1.1.0
 changelog=
     1.0.0 sphinx documentation, add metadata variable for schema, geometry column and crs.
     1.0.1 crs correction.
